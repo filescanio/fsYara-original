@@ -53,7 +53,7 @@ jobs:
         TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
       run: |
         find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
-        rsync -av --exclude=".*" --exclude="target-repo" ./ target-repo
+        rsync -avq --exclude=".*" --exclude="target-repo" ./ target-repo
         cd target-repo
         FEATURE_BRANCH="STI-7263-hardened-yara"
         git config user.email "zsolt.major@opswat.com"
