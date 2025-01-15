@@ -147,7 +147,7 @@ def main():
 
     args = parser.parse_args()
 
-    args.verbose = 50 - (10*args.verbose) if args.verbose > 0 else 0
+    args.verbose = 40 - (10*args.verbose) if args.verbose > 0 else 0
     logging.basicConfig(level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
 
