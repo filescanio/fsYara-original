@@ -11,6 +11,7 @@ try:
     ERROR = process.returncode
     tmpfile.unlink()
 except Exception as e:
+    print(e)
     pass
 
 sys.exit(ERROR)
