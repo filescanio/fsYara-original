@@ -26,6 +26,9 @@ jobs:
         pip install plyara #! trying pip 
         # python3 -m pip install yara-python
         pip install yara-python
+        cd /usr/local/lib
+        ls -la
+        cat /etc/ld.so.conf
         curl -LO "https://github.com/VirusTotal/yara/archive/refs/tags/v4.5.2.tar.gz"
         ls
         tar -zxf v4.5.2.tar.gz
