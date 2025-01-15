@@ -20,24 +20,8 @@ jobs:
     # plyara must happen before the pre commit execution 
     - name: Yara installation
       run: |
-        mkdir -p .install_yara
-        cd .install_yara
-        pip3 install plyara
-        pip install plyara #! trying pip 
-        # python3 -m pip install yara-python
-        pip install yara-python
-        curl -LO "https://github.com/VirusTotal/yara/archive/refs/tags/v4.5.2.tar.gz"
-        ls
-        tar -zxf v4.5.2.tar.gz
-        ls
-        cd yara-4.5.2
-        ./bootstrap.sh
-        ./configure
-        make
-        sudo make install
-        sudo ln -s /usr/local/lib/python3.10/dist-packages/usr/lib/libyara.so /usr/lib/libyara.so
-        sudo echo "/usr/local/lib" >> /etc/ld.so.conf
-        sudo ldconfig
+        python3 -m pip uninstall yara
+        python3 -m pip install yara-python
 
     - name: pre-commit
       uses: pre-commit/action@v3.0.1
