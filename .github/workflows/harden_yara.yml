@@ -41,7 +41,8 @@ jobs:
       env:
         TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
       run: |
-        rsync -av --exclude=".*" ./ target-repo
+        find target-repo -mindepth 1 ! -name ".git" -exec rm -rf {} +
+        rsync -av --exclude=".*" --exclude="target-repo" ./ target-repo
         cd target-repo
         FEATURE_BRANCH="STI-7263-hardened-yara"
         git config user.email "zsolt.major@opswat.com"
