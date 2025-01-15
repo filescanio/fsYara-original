@@ -26,7 +26,6 @@ jobs:
         pip install plyara #! trying pip 
         # python3 -m pip install yara-python
         pip install yara-python
-        sudo ln -s /usr/local/lib/python3.10/dist-packages/usr/lib/libyara.so /usr/lib/libyara.so
         curl -LO "https://github.com/VirusTotal/yara/archive/refs/tags/v4.5.2.tar.gz"
         ls
         tar -zxf v4.5.2.tar.gz
@@ -36,6 +35,9 @@ jobs:
         ./configure
         make
         sudo make install
+        sudo ln -s /usr/local/lib/python3.10/dist-packages/usr/lib/libyara.so /usr/lib/libyara.so
+        sudo echo "/usr/local/lib" >> /etc/ld.so.conf
+        sudo ldconfig
 
     - name: pre-commit
       uses: pre-commit/action@v3.0.1
