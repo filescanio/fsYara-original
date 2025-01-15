@@ -19,10 +19,7 @@ jobs:
     - name: Yara hardening
       run: |
         pip3 install plyara
-        python3 tools/ci/harden_yara.py . > output.log 2>&1 
-        pwd #!
-        # chmod +x tools/ci/execute_hardening.sh
-        # ./tools/ci/execute_hardening.sh
+        python3 tools/ci/harden_yara.py . > output.log 2>&1
 
     - name: Clone Target Repository
       env:
@@ -44,8 +41,6 @@ jobs:
       env:
         TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
       run: |
-        ls -la #!
-        pwd #!
         rsync -av --exclude=".*" ./ target-repo
         cd target-repo
         FEATURE_BRANCH="STI-7263-hardened-yara"
