@@ -25,7 +25,6 @@ jobs:
         pip3 install plyara
         pip install plyara #! trying pip 
         python3 -m pip install yara-python
-        find libyara.so
         curl -LO "https://github.com/VirusTotal/yara/archive/refs/tags/v4.5.2.tar.gz"
         ls
         tar -zxf v4.5.2.tar.gz
