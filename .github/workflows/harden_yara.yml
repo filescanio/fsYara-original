@@ -21,6 +21,14 @@ jobs:
     - name: Yara installation
       run: |
         pip3 install plyara
+        curl -LO "https://github.com/VirusTotal/yara/archive/refs/tags/v4.5.2.tar.gz"
+        ls
+        tar -zxf yara-4.5.2.tar.gz
+        cd yara-4.5.2
+        ./bootstrap.sh
+        ./configure
+        make
+        sudo make install
         python3 tools/ci/compile.py
 
     - name: pre-commit
