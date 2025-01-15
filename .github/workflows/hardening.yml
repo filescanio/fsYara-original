@@ -28,7 +28,7 @@ jobs:
 
     - name: Yara hardening
       run: |
-        python3 tools/ci/harden_yara.py . 
+        python3 tools/ci/harden_yara.py . -v -v -v 
 
     - name: Clone Target Repository
       env:
