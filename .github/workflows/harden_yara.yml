@@ -34,8 +34,8 @@ jobs:
         cd target-repo
         FEATURE_BRANCH="STI-7263-hardened-yara"
         # git pull origin $FEATURE_BRANCH
-        # git fetch origin $FEATURE_BRANCH
-        git checkout -b $FEATURE_BRANCH
+        git fetch origin $FEATURE_BRANCH
+        git checkout $FEATURE_BRANCH
 
     - name: Commit and Push
       env:
