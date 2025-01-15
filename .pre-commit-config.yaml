@@ -24,4 +24,4 @@ repos:
         name: Compile rules
         entry: python3 tools/ci/compile.py
         language: system
-        files: .yara?
+        files: \.yara?
