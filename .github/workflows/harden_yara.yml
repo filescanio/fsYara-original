@@ -21,6 +21,7 @@ jobs:
     - name: Yara installation
       run: |
         pip3 install plyara
+        python3 tools/ci/compile.py
 
     - name: pre-commit
       uses: pre-commit/action@v3.0.1
