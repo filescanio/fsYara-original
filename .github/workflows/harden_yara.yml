@@ -1,0 +1,56 @@
+name: Push to fsYara
+
+on:
+  push:
+    branches:
+      - STI-*
+      - main  # Trigger on pushes to the main branch
+
+jobs:
+  update-fsYara-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the source repository
+    - name: Checkout Source Repository
+      uses: actions/checkout@v3
+
+    # Step 2: Execute yara rule hardening
+    - name: Yara hardening
+      run: |
+        pip3 install plyara
+        python3 tools/ci/harden_yara.py . > output.log 2>&1 
+        pwd #!
+        # chmod +x tools/ci/execute_hardening.sh
+        # ./tools/ci/execute_hardening.sh
+
+    - name: Clone Target Repository
+      env:
+        TARGET_REPO_URL: https://github.com/filescanio/fsYara-test.git
+        TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
+      run: |
+        rm -rf target-repo
+        git clone https://$TARGET_REPO_PAT@github.com/filescanio/fsYara-test.git target-repo
+
+    - name: Create or Checkout Feature Branch
+      run: |
+        cd target-repo
+        FEATURE_BRANCH="STI-7263-hardened-yara"
+        # git pull origin $FEATURE_BRANCH
+        # git fetch origin $FEATURE_BRANCH
+        git checkout -b $FEATURE_BRANCH
+
+    - name: Commit and Push
+      env:
+        TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
+      run: |
+        ls -la #!
+        pwd #!
+        rsync -av --exclude=".*" ./ target-repo
+        cd target-repo
+        FEATURE_BRANCH="STI-7263-hardened-yara"
+        git config user.email "zsolt.major@opswat.com"
+        git config user.name "zsoltmajoropswat"
+        git add .
+        git commit -m "Automated update from source repository"
+        git push --set-upstream origin $FEATURE_BRANCH
