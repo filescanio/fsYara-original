@@ -21,7 +21,7 @@ jobs:
     - name: Yara installation
       run: |
         mkdir -p .install_yara
-        cd install_yara
+        cd .install_yara
         pip3 install plyara
         curl -LO "https://github.com/VirusTotal/yara/archive/refs/tags/v4.5.2.tar.gz"
         ls
