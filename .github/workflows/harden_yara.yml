@@ -11,14 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the source repository
     - name: Checkout Source Repository
       uses: actions/checkout@v3
 
-    # Step 2: Execute yara rule hardening
-    - name: Yara hardening
+    - name: python setup
+      uses: actions/setup-python@v3
+
+    # plyara must happen before the pre commit execution 
+    - name: Yara installation
       run: |
         pip3 install plyara
+
+    - name: pre-commit
+      uses: pre-commit/action@v3.0.1
+
+    - name: Yara hardening
+      run: |
         python3 tools/ci/harden_yara.py . 
 
     - name: Clone Target Repository
@@ -41,7 +49,6 @@ jobs:
       env:
         TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
       run: |
-        # find target-repo -mindepth 1 ! -name ".git" -exec rm -rf {} +
         find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
         rsync -av --exclude=".*" --exclude="target-repo" ./ target-repo
         cd target-repo
