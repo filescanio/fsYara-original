@@ -26,9 +26,11 @@ jobs:
     - name: pre-commit
       uses: pre-commit/action@v3.0.1
 
+      # default verbosity is 30 (Critical, Error, Warning) 
+      # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
     - name: Yara hardening
       run: |
-        python3 tools/ci/harden_yara.py . -v
+        python3 tools/ci/harden_yara.py .
 
     - name: Clone Target Repository
       env:

@@ -18,16 +18,14 @@ def string_to_hex_array(s, encoding='ascii'):
 
 def process_yara_ruleset(yara_ruleset, strip_comments=True):
     hex_ruleset = ''
-    modifications = []
     yara_parser = plyara.Plyara()
     try:
         rules = yara_parser.parse_string(yara_ruleset)
     except:
         # invalid yara ruleset
-        modifications.append("[Parsing error] Removed file content due to invalid YARA syntax")
         logging.error("[Parsing error] Removed file content due to invalid YARA syntax")
         hex_ruleset = "// Removed content due to invalid YARA syntax" # leave a comment in the yara file
-        return hex_ruleset, modifications
+        return hex_ruleset
 
     for rule in rules:
         try:
@@ -59,7 +57,6 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                 old_value = string['value']
                                 string['value'] = f'{{{hex_string}}}'
                                 string['type'] = 'hex'
-                                modifications.append(f"[{rule['rule_name']}][{string['name']}] Converted string (encoding: {encoding}) to hex: {old_value} -> {string['value']}")
                                 logging.info(f"[{rule['rule_name']}][{string['name']}] Converted string (encoding: {encoding}) to hex: {old_value} -> {string['value']}")
 
             # add hardened yara rule
@@ -68,7 +65,6 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
             # error hardening a yara rule
             # only drop problematic yara rule, not the yara ruleset
             if rule and 'rule_name' in rule:
-                modifications.append(f"[Hardening error] Removed yara rule {rule['rule_name']} due to invalid YARA syntax")
                 logging.error(f"[Hardening error] Removed yara rule {rule['rule_name']} due to invalid YARA syntax")
 
     # test hardened yara ruleset
@@ -77,11 +73,10 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
         yara_parser.parse_string(hex_ruleset)
     except:
         # invalid yara ruleset
-        modifications.append("[Hardening error] Removed ruleset due to invalid YARA syntax after hardening")
         logging.error("[Hardening error] Removed ruleset due to invalid YARA syntax after hardening")
         hex_ruleset = "// Content could not be hardened properly" # leave a comment in the yara file
 
-    return hex_ruleset, modifications
+    return hex_ruleset
 
 def process_file(ruleset, input_file, output_file, strip_comments=True):
     try:
@@ -92,19 +87,13 @@ def process_file(ruleset, input_file, output_file, strip_comments=True):
             ruleset_content = infile.read()
 
     if ruleset_content:
-        converted_yara_ruleset, modifications = process_yara_ruleset(ruleset_content, strip_comments=strip_comments)
+        logging.info(f"Modifications in ruleset: {ruleset}")
+        converted_yara_ruleset = process_yara_ruleset(ruleset_content, strip_comments=strip_comments)
 
         # always overwrite, since parser removes unnecessary stuff
         if converted_yara_ruleset:
             with open(output_file, 'w', encoding='utf-8') as outfile:
                 outfile.write(converted_yara_ruleset)
-
-            if modifications:
-                print(f"Modifications in ruleset: {ruleset}")
-                logging.info(f"Modifications in ruleset: {ruleset}")
-                for mod in modifications:
-                    pass
-                    # print(f"\t{mod}")
 
 def traverse_and_process(input_folder, output_prefix=None, strip_comments=True):
     for root, _, files in os.walk(input_folder):
