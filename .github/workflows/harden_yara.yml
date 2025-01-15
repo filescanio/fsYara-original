@@ -19,7 +19,7 @@ jobs:
     - name: Yara hardening
       run: |
         pip3 install plyara
-        python3 tools/ci/harden_yara.py . > output.log 2>&1
+        python3 tools/ci/harden_yara.py . 
 
     - name: Clone Target Repository
       env:
