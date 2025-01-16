@@ -31,6 +31,9 @@ jobs:
     - name: Yara hardening
       run: |
         python3 tools/ci/harden_yara.py .
+      
+    - name: pre-commit after hardening
+      uses: pre-commit/action@v3.0.1
 
     - name: Clone Target Repository
       env:
