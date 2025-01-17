@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - STI-*
-      - main  # Trigger on pushes to the main branch
+      - master
 
 jobs:
   update-fsYara-repo:
@@ -30,12 +30,14 @@ jobs:
       # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
     - name: Yara hardening
       run: |
-        python3 tools/ci/harden_yara.py .
+        #! python3 tools/ci/harden_yara.py .
+        python3 tools/ci/harden_yara.py executable
       
     - name: pre-commit after hardening
       uses: pre-commit/action@v3.0.1
 
     - name: Clone Target Repository
+      if: github.ref == 'refs/heads/master'
       env:
         TARGET_REPO_URL: https://github.com/filescanio/fsYara-test.git
         TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
@@ -43,13 +45,13 @@ jobs:
         rm -rf target-repo
         git clone https://$TARGET_REPO_PAT@github.com/filescanio/fsYara-test.git target-repo
 
-    - name: Create or Checkout Feature Branch
-      run: |
-        cd target-repo
-        FEATURE_BRANCH="STI-7263-hardened-yara"
-        # git pull origin $FEATURE_BRANCH
-        git fetch origin $FEATURE_BRANCH
-        git checkout $FEATURE_BRANCH
+    # - name: Create or Checkout Feature Branch
+    #   run: |
+    #     cd target-repo
+    #     FEATURE_BRANCH="STI-7263-hardened-yara"
+    #     # git pull origin $FEATURE_BRANCH
+    #     git fetch origin $FEATURE_BRANCH
+    #     git checkout $FEATURE_BRANCH
 
     - name: Commit and Push
       env:
@@ -58,9 +60,10 @@ jobs:
         find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
         rsync -avq --exclude=".*" --exclude="target-repo" ./ target-repo
         cd target-repo
-        FEATURE_BRANCH="STI-7263-hardened-yara"
+        #!FEATURE_BRANCH="STI-7263-hardened-yara"
         git config user.email "zsolt.major@opswat.com"
         git config user.name "zsoltmajoropswat"
         git add .
         git commit -m "Automated update from source repository"
-        git push --set-upstream origin $FEATURE_BRANCH
+        #! git push --set-upstream origin $FEATURE_BRANCH
+        git push --set-upstream origin
