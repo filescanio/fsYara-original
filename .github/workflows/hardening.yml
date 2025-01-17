@@ -41,6 +41,7 @@ jobs:
         mkdir -p ~/.ssh
         echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/deploy_key
         chmod 600 ~/.ssh/deploy_key
+        ssh-add ~/.ssh/deploy_key
         ssh-keyscan github.com >> ~/.ssh/known_hosts
 
     - name: Clone Target Repository
