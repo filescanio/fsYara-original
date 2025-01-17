@@ -36,19 +36,29 @@ jobs:
     - name: pre-commit after hardening
       uses: pre-commit/action@v3.0.1
 
+    - name: Set up SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+
     - name: Clone Target Repository
-      if: github.ref == 'refs/heads/master'
-      env:
-        TARGET_REPO_URL: https://github.com/filescanio/fsYara-test.git
-        TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
+      # if: github.ref == 'refs/heads/master'
+      # env:
+      #   TARGET_REPO_URL: https://github.com/filescanio/fsYara-test.git
+      #   TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
+      # run: |
+      #   rm -rf target-repo
+      #   git clone https://$TARGET_REPO_PAT@github.com/filescanio/fsYara-test.git target-repo
       run: |
         rm -rf target-repo
-        git clone https://$TARGET_REPO_PAT@github.com/filescanio/fsYara-test.git target-repo
+        git clone https://github.com/filescanio/fsYara-test.git target-repo
 
     - name: Commit and Push
-      if: github.ref == 'refs/heads/master'
-      env:
-        TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
+      # if: github.ref == 'refs/heads/master'
+      # env:
+      #   TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
       run: |
         find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
         rsync -avq --exclude=".*" --exclude="target-repo" ./ target-repo
@@ -58,3 +68,6 @@ jobs:
         git add .
         git commit -m "Automated update from source repository"
         git push --set-upstream origin
+
+
+FSYARA_DEPLOY_KEY
