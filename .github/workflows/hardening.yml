@@ -37,7 +37,7 @@ jobs:
       uses: pre-commit/action@v3.0.1
 
     - name: Clone Target Repository
-      if: github.ref == 'refs/heads/master'
+      # if: github.ref == 'refs/heads/master'
       env:
         TARGET_REPO_URL: https://github.com/filescanio/fsYara-test.git
         TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
@@ -54,7 +54,7 @@ jobs:
     #     git checkout $FEATURE_BRANCH
 
     - name: Commit and Push
-      if: github.ref == 'refs/heads/master'
+      # if: github.ref == 'refs/heads/master'
       env:
         TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
       run: |
