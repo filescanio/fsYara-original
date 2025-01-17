@@ -70,7 +70,8 @@
         ( uint16(0) == 0x5a4d and filesize < 2000KB and ( 2 of ($x*) or 8 of ($s*) ) ) or ( 12 of them )
 }*/
 
-rule Turla_APT_Malware_Gen2 
+// Duplicated
+/*rule Turla_APT_Malware_Gen2 
 {
 
     meta:
@@ -105,7 +106,7 @@ rule Turla_APT_Malware_Gen2
     
     condition:
         ( uint16(0) == 0x5a4d and filesize < 2000KB and ( 1 of ($x*) or 5 of ($s*) ) ) or ( 10 of them )
-}
+}*/
 
 
 // duplicated
