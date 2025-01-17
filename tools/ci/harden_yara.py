@@ -117,7 +117,7 @@ def traverse_and_process(input_folder, output_prefix=None, strip_comments=True):
 
                 processing_result = process_file(file, input_file_path, output_file_path, strip_comments)
                 if not processing_result:
-                    logging.error(f"Hardening error occurred for file: {input_file}")
+                    logging.error(f"Hardening error occurred for file: {input_file_path}")
                     hardening_success = False
     
     if not hardening_success:
