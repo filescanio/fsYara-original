@@ -25,7 +25,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
         rules = yara_parser.parse_string(yara_ruleset)
     except:
         # invalid yara ruleset
-        logging.error("[Parsing error] Removed file content due to invalid YARA syntax")
+        logging.error("[Parsing error] Invalid YARA syntax")
         success = False
         hex_ruleset = "// Removed content due to invalid YARA syntax" # leave a comment in the yara file
         return hex_ruleset
@@ -68,7 +68,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
             # error hardening a yara rule
             # only drop problematic yara rule, not the yara ruleset
             if rule and 'rule_name' in rule:
-                logging.error(f"[Hardening error] Removed yara rule {rule['rule_name']} due to invalid YARA syntax")
+                logging.error(f"[Hardening error] Erroneous yara rule {rule['rule_name']} containing invalid YARA syntax")
                 success = False
 
     # test hardened yara ruleset
@@ -77,13 +77,14 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
         yara_parser.parse_string(hex_ruleset)
     except:
         # invalid yara ruleset
-        logging.error("[Hardening error] Removed ruleset due to invalid YARA syntax after hardening")
+        logging.error("[Hardening error] Invalid YARA syntax after hardening")
         success = False
         hex_ruleset = "// Content could not be hardened properly" # leave a comment in the yara file
 
     return hex_ruleset, success
 
 def process_file(ruleset, input_file, output_file, strip_comments=True):
+    success = False
     try:
         with open(input_file, 'r', encoding='utf-8') as infile:
             ruleset_content = infile.read()
@@ -95,17 +96,15 @@ def process_file(ruleset, input_file, output_file, strip_comments=True):
         logging.info(f"Modifications in ruleset: {ruleset}")
         converted_yara_ruleset, success = process_yara_ruleset(ruleset_content, strip_comments=strip_comments)
 
-        if not success:
-            logging.error(f"One ore more hardening errors occurred!")
-            logging.error(f"Consult the logs and fix the potentially malfowmed Yara rules")
-            sys.exit(1)
-
         # always overwrite, since parser removes unnecessary stuff
         if converted_yara_ruleset:
             with open(output_file, 'w', encoding='utf-8') as outfile:
                 outfile.write(converted_yara_ruleset)
-
+            
+    return success
+        
 def traverse_and_process(input_folder, output_prefix=None, strip_comments=True):
+    hardening_success = True
     for root, _, files in os.walk(input_folder):
         for file in files:
             if file.endswith(".yar") or file.endswith(".yara"):
@@ -116,7 +115,14 @@ def traverse_and_process(input_folder, output_prefix=None, strip_comments=True):
                 else:
                     output_file_path = input_file_path
 
-                process_file(file, input_file_path, output_file_path, strip_comments)
+                processing_result = process_file(file, input_file_path, output_file_path, strip_comments)
+                if not processing_result:
+                    logging.error(f"Hardening error occurred for file: {input_file}")
+                    hardening_success = False
+    
+    if not hardening_success:
+        logging.error("Yara hardening process failed!")
+        sys.exit(1)
 
 def delete_files_in_yara_folder(root_dir):
     # Walk through the directory tree
