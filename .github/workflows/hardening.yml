@@ -30,7 +30,7 @@ jobs:
       # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
     - name: Yara hardening
       run: |
-        python3 tools/ci/harden_yara.py .
+        python3 tools/ci/harden_yara.py low_hit
       
     # Running pre-commit after hardening to make sure, that the process did not break any Yara rule
     - name: pre-commit after hardening
