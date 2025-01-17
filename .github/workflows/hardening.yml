@@ -31,7 +31,7 @@ jobs:
     - name: Yara hardening
       run: |
         #! python3 tools/ci/harden_yara.py .
-        python3 tools/ci/harden_yara.py executable
+        python3 tools/ci/harden_yara.py documents
       
     - name: pre-commit after hardening
       uses: pre-commit/action@v3.0.1
