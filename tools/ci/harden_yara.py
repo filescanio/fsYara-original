@@ -120,7 +120,9 @@ def traverse_and_process(input_folder, output_prefix=None, strip_comments=True):
                     logging.error(f"Hardening error occurred for file: {input_file_path}")
                     hardening_success = False
     
-    if not hardening_success:
+    if hardening_success:
+        print(f"Yara hardening process completed successfully!")
+    else:
         logging.error("Yara hardening process failed!")
         sys.exit(1)
 

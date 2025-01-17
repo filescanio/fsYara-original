@@ -53,7 +53,8 @@ jobs:
       #   git clone https://$TARGET_REPO_PAT@github.com/filescanio/fsYara-test.git target-repo
       run: |
         rm -rf target-repo
-        git clone https://github.com/filescanio/fsYara-test.git target-repo
+        # git clone https://github.com/filescanio/fsYara-test.git target-repo
+        git clone git@github.com:filescanio/fsYara-test.git target-repo
 
     - name: Commit and Push
       # if: github.ref == 'refs/heads/master'
