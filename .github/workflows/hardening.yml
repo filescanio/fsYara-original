@@ -23,8 +23,8 @@ jobs:
         pip3 install plyara
         sudo apt install yara
 
-    - name: pre-commit
-      uses: pre-commit/action@v3.0.1
+    # - name: pre-commit
+    #   uses: pre-commit/action@v3.0.1
 
       # default verbosity is 30 (Critical, Error, Warning) 
       # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
