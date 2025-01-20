@@ -45,8 +45,8 @@ jobs:
         export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no"
         ls -la ~/.ssh
         # ssh -i ~/.ssh/id_ed25519 -T git@github.com
-        # eval `ssh-agent -s`
-        # ssh-add your_key
+        eval `ssh-agent -s`
+        ssh-add id_ed25519
         rm -rf target-repo
         # git clone https://github.com/filescanio/fsYara-test.git target-repo
         # git remote add target "git@github.com:filescanio/fsYara-test.git"
