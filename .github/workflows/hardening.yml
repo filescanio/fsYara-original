@@ -46,7 +46,7 @@ jobs:
         # ssh-add your_key
         rm -rf target-repo
         # git clone https://github.com/filescanio/fsYara-test.git target-repo
-        git remote add target "git@github.com:filescanio/fsYara-test.git"
+        # git remote add target "git@github.com:filescanio/fsYara-test.git"
         git clone git@github.com:filescanio/fsYara-test.git target-repo
 
     - name: Clone Target Repository
