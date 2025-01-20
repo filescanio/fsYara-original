@@ -44,7 +44,7 @@ jobs:
         chmod 600 ~/.ssh/id_ed25519
         export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no"
         ls -la ~/.ssh
-        ssh -i ~/.ssh/id_ed25519 -T git@github.com
+        # ssh -i ~/.ssh/id_ed25519 -T git@github.com
         # eval `ssh-agent -s`
         # ssh-add your_key
         rm -rf target-repo
