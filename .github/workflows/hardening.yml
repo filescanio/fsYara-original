@@ -58,8 +58,8 @@ jobs:
         find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
         rsync -avq --exclude=".*" --exclude="target-repo" ./ target-repo
         cd target-repo
-        # git config user.email "zsolt.major@opswat.com"
-        # git config user.name "zsoltmajoropswat"
+        git config user.email "bot@automation.local"
+        git config user.name "Automation Bot"
         git add .
         git commit -m "Automated update from source repository"
         git push --set-upstream origin
