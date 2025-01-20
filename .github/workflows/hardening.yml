@@ -36,6 +36,7 @@ jobs:
     - name: pre-commit after hardening
       uses: pre-commit/action@v3.0.1
 
+    # testing ssh deploy keys 
     - name: Set up SSH Key
       run: |
         mkdir -p ~/.ssh
