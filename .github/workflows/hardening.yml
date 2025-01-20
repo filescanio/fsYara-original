@@ -40,17 +40,17 @@ jobs:
     - name: Set up SSH Key
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/ed25519
-        chmod 600 ~/.ssh/ed25519
-        export GIT_SSH_COMMAND="ssh -i ~/.ssh/ed25519 -o StrictHostKeyChecking=no"
+        echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no"
         ls -la ~/.ssh
-        ssh -i ~/.ssh/ed25519 -T git@github.com
+        ssh -i ~/.ssh/id_ed25519 -T git@github.com
         # eval `ssh-agent -s`
         # ssh-add your_key
         rm -rf target-repo
         # git clone https://github.com/filescanio/fsYara-test.git target-repo
         # git remote add target "git@github.com:filescanio/fsYara-test.git"
-        ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+        # ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
         git clone git@github.com:filescanio/fsYara-test.git target-repo
 
     - name: Clone Target Repository
