@@ -30,7 +30,7 @@ jobs:
       # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
     - name: Yara hardening
       run: |
-        python3 tools/ci/harden_yara.py low_hit
+        python3 tools/ci/harden_yara.py mwtrends
       
     # Running pre-commit after hardening to make sure, that the process did not break any Yara rule
     - name: pre-commit after hardening
@@ -43,19 +43,11 @@ jobs:
         echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no"
-        rm -rf target-repo
 
     - name: Clone Target Repository
       # if: github.ref == 'refs/heads/master'
-      # env:
-      #   TARGET_REPO_URL: https://github.com/filescanio/fsYara-test.git
-      #   TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
-      # run: |
-      #   rm -rf target-repo
-      #   git clone https://$TARGET_REPO_PAT@github.com/filescanio/fsYara-test.git target-repo
       run: |
         rm -rf target-repo
-        # git clone https://github.com/filescanio/fsYara-test.git target-repo
         git clone git@github.com:filescanio/fsYara-test.git target-repo
 
     - name: Commit and Push
@@ -66,8 +58,8 @@ jobs:
         find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
         rsync -avq --exclude=".*" --exclude="target-repo" ./ target-repo
         cd target-repo
-        git config user.email "zsolt.major@opswat.com"
-        git config user.name "zsoltmajoropswat"
+        # git config user.email "zsolt.major@opswat.com"
+        # git config user.name "zsoltmajoropswat"
         git add .
         git commit -m "Automated update from source repository"
         git push --set-upstream origin
