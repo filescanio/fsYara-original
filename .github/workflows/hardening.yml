@@ -41,8 +41,7 @@ jobs:
         mkdir -p ~/.ssh
         echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/deploy_key
         chmod 600 ~/.ssh/deploy_key
-        eval `ssh-agent -s`
-        ssh-add ~/.ssh/deploy_key
+        export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no"
 
     - name: Clone Target Repository
       # if: github.ref == 'refs/heads/master'
@@ -55,6 +54,7 @@ jobs:
       run: |
         rm -rf target-repo
         # git clone https://github.com/filescanio/fsYara-test.git target-repo
+        git remote add target "git@github.com:filescanio/fsYara-test.git"
         git clone git@github.com:filescanio/fsYara-test.git target-repo
 
     - name: Commit and Push
