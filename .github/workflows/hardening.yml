@@ -39,9 +39,9 @@ jobs:
     - name: Set up SSH Key
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/deploy_key
-        chmod 600 ~/.ssh/deploy_key
-        export GIT_SSH_COMMAND="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
+        echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/ed25519
+        chmod 600 ~/.ssh/ed25519
+        export GIT_SSH_COMMAND="ssh -i ~/.ssh/ed25519 -o StrictHostKeyChecking=no"
         # eval `ssh-agent -s`
         # ssh-add your_key
         rm -rf target-repo
