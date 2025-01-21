@@ -6342,7 +6342,7 @@ rule WEBSHELL_JSP_By_String
 rule WEBSHELL_JSP_Input_Upload_Write
 {
     meta:
-        description = "JSP uploader which gets input, writes files and contains \"upload\""
+        description = "JSP uploader which gets input, writes files and contains upload"
         license = "Detection Rule License 1.1 https://github.com/Neo23x0/signature-base/blob/master/LICENSE"
         author = "Arnim Rupp (https://github.com/ruppde)"
         reference = "Internal Research"
