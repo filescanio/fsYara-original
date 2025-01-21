@@ -39,7 +39,7 @@ jobs:
       uses: pre-commit/action@v3.0.1
 
     - name: Set up SSH Key
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/STI-7263-yara-hardening'
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/id_ed25519
