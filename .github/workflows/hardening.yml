@@ -3,8 +3,10 @@ name: Push to fsYara
 on:
   push:
     branches:
-      - STI-*
-      - master
+      - '**'
+
+env:
+  PLYARA_VERSION: 2.2.7
 
 jobs:
   update-fsYara-repo:
@@ -20,24 +22,24 @@ jobs:
     # plyara and yara installation must happen before the pre commit execution (compile.py requires it)
     - name: Yara installation
       run: |
-        pip3 install plyara
+        pip3 install plyara==${PLYARA_VERSION}
         sudo apt install yara
 
     - name: pre-commit
       uses: pre-commit/action@v3.0.1
 
-      # default verbosity is 30 (Critical, Error, Warning) 
+      # default verbosity is 30 (Critical, Error, Warning)
       # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
     - name: Yara hardening
       run: |
-        python3 tools/ci/harden_yara.py mwtrends
+        python3 tools/ci/harden_yara.py .
       
     # Running pre-commit after hardening to make sure, that the process did not break any Yara rule
     - name: pre-commit after hardening
       uses: pre-commit/action@v3.0.1
 
-    # testing ssh deploy keys 
     - name: Set up SSH Key
+      # if: github.ref == 'refs/heads/master'
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/id_ed25519
@@ -52,8 +54,6 @@ jobs:
 
     - name: Commit and Push
       # if: github.ref == 'refs/heads/master'
-      # env:
-      #   TARGET_REPO_PAT: ${{ secrets.TARGET_REPO_PAT }}
       run: |
         find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
         rsync -avq --exclude=".*" --exclude="target-repo" ./ target-repo
