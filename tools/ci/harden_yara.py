@@ -62,6 +62,14 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                 string['type'] = 'hex'
                                 logging.info(f"[{rule['rule_name']}][{string['name']}] Converted string (encoding: {encoding}) to hex: {old_value} -> {string['value']}")
 
+            # add hardened tag
+            tags = []
+            if 'tags' in rule:
+                tags = rule['tags']
+            tags.append('hardened')
+            rule['tags'] = tags
+
+
             # add hardened yara rule
             hex_ruleset += rebuild_yara_rule(rule, condition_indents=False) + '\n'
         except:
