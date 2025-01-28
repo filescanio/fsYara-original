@@ -86,7 +86,6 @@ for matching_rule in rules_match:
 if (len(error_rules)) > 0:
     print(error_rules)
     print("\n Some rules did not match the correponding samples, see printed json.")
-    return False
+    sys.exit(1)
 else:
     print("All the rules matched.")
-    return True

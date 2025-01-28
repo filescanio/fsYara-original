@@ -10,7 +10,7 @@ import requests
 import base64
 import json
 
-fskey = 'szsztAKw4A4QKwpy72uPpciJyHMaK5kO9_ybkX1z'
+fskey = "YOUR_FSIO_API_KEY"
 
 rulesets_dir = sys.argv[1]
 
