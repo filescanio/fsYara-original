@@ -34,7 +34,7 @@ jobs:
       run: |
         python3 tools/ci/harden_yara.py .
       
-    # Running pre-commit after hardening to make sure, that the process did not break any Yara rule
+    # Running pre-commit after hardening to make sure, that the process did not break any yara rule
     - name: pre-commit after hardening
       uses: pre-commit/action@v3.0.1
 
