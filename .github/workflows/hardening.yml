@@ -41,6 +41,8 @@ jobs:
     # Testing hardened yara rules
     - name: Rule testing
       run: |
+        pip uninstall yara
+        pip install yara-python
         python3 tools/ci/test_rules.py .
 
     - name: Set up SSH Key
