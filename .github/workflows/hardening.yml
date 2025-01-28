@@ -7,7 +7,7 @@ on:
 
 env:
   PLYARA_VERSION: 2.2.7
-  YARA_PYTHON_VRSION: 4.5.1 
+  YARA_PYTHON_VRSION: 4.5.1
 
 jobs:
   update-fsYara-repo:
@@ -36,8 +36,8 @@ jobs:
         pip install yara-python==${YARA_PYTHON_VRSION}
         python3 tools/ci/test_rules.py .
 
-      # default verbosity is 30 (Critical, Error, Warning)
-      # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
+    # default verbosity is 30 (Critical, Error, Warning)
+    # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
     - name: Yara hardening
       run: |
         python3 tools/ci/harden_yara.py .
