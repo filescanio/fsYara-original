@@ -28,6 +28,13 @@ jobs:
     - name: pre-commit
       uses: pre-commit/action@v3.0.1
 
+    # Testing hardened Yara rules before hardening
+    - name: Rule testing
+      run: |
+        pip uninstall yara
+        pip install yara-python
+        python3 tools/ci/test_rules.py .
+
       # default verbosity is 30 (Critical, Error, Warning)
       # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
     - name: Yara hardening
@@ -39,10 +46,8 @@ jobs:
       uses: pre-commit/action@v3.0.1
 
     # Testing hardened yara rules
-    - name: Rule testing
+    - name: Rule testing after hardening
       run: |
-        pip uninstall yara
-        pip install yara-python
         python3 tools/ci/test_rules.py .
 
     - name: Set up SSH Key
