@@ -7,6 +7,7 @@ on:
 
 env:
   PLYARA_VERSION: 2.2.7
+  YARA_PYTHON_VRSION: 4.5.1 
 
 jobs:
   update-fsYara-repo:
@@ -42,7 +43,7 @@ jobs:
     - name: Rule testing after hardening
       run: |
         pip uninstall yara
-        pip install yara-python
+        pip install yara-python==${YARA_PYTHON_VRSION}
         python3 tools/ci/test_rules.py .
 
     - name: Set up SSH Key
