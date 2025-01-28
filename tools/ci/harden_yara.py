@@ -1,4 +1,5 @@
 import os
+import re
 import argparse
 import logging
 import sys
@@ -6,16 +7,26 @@ import plyara
 from plyara.utils import rebuild_yara_rule
 
 
+# https://yara.readthedocs.io/en/v3.4.0/writingrules.html#text-strings
+def escape_yara(s):
+    # Replace hexadecimal notation (e.g., \xdd)
+    s = re.sub(r'\\x([a-fA-F0-9]{2})', lambda m: chr(int(m.group(1), 16)), s)
+
+    s = s.replace('\\"', '"')  # Double quote
+    s = s.replace('\\\\', '\\')  # Backslash
+    s = s.replace('\\t', '\t')  # Horizontal tab
+    s = s.replace('\\n', '\n')  # New line
+
+    return s
+
 def string_to_hex_array(s, encoding='ascii'):
+    s = escape_yara(s)
     if 'ascii&wide' in encoding:
         return "( " + " ".join(f"{ord(c):02X}" for c in s) + " | " + " 00 ".join(f"{ord(c):02X}" for c in s) + " 00" + " )"
     if 'ascii' in encoding:
         return " ".join(f"{ord(c):02X}" for c in s)
     if 'wide' in encoding:
         return " 00 ".join(f"{ord(c):02X}" for c in s) + " 00"
-
-
-
 
 def process_yara_ruleset(yara_ruleset, strip_comments=True):
     hex_ruleset = ''
