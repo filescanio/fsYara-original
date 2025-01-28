@@ -38,6 +38,11 @@ jobs:
     - name: pre-commit after hardening
       uses: pre-commit/action@v3.0.1
 
+    # Testing hardened yara rules
+    - name: Rule testing
+      run: |
+        python3 tools/ci/test_rules.py .
+
     - name: Set up SSH Key
       # if: github.ref == 'refs/heads/master'
       run: |

