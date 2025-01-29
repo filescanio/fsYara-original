@@ -8,25 +8,72 @@ from plyara.utils import rebuild_yara_rule
 
 
 # https://yara.readthedocs.io/en/v3.4.0/writingrules.html#text-strings
-def escape_yara(s):
-    # Replace hexadecimal notation (e.g., \xdd)
-    s = re.sub(r'\\x([a-fA-F0-9]{2})', lambda m: chr(int(m.group(1), 16)), s)
-
+def escape_yara(s: str) -> bytes:
     s = s.replace('\\"', '"')  # Double quote
     s = s.replace('\\\\', '\\')  # Backslash
     s = s.replace('\\t', '\t')  # Horizontal tab
     s = s.replace('\\n', '\n')  # New line
 
+    # Replace hexadecimal notation (e.g., \xdd)
+    s = re.sub(rb'\\x([a-fA-F0-9]{2})', lambda m: bytes([int(m.group(1), 16)]), s.encode())
+
     return s
 
-def string_to_hex_array(s, encoding='ascii'):
+def string_to_hex_array(s, is_wide, is_ascii, is_nocase):
+    def to_hex(b):
+        return f"{b:02x}"
+    
+    def ascii_encoding(char: int) -> str:
+        if not is_nocase:
+            return to_hex(char)
+        
+        try:
+            decoded_char = chr(char)
+            if (char < 0 or char > 127) or len(decoded_char) > 1:
+                raise "Wrong decode"
+
+            # upper or lowercasing may produce longer than 1 character things, good example is ß
+            lower = to_hex(ord(decoded_char.lower()) if len(decoded_char.lower()) == 1 else decoded_char)
+            upper = to_hex(ord(decoded_char.upper()) if len(decoded_char.upper()) == 1 else decoded_char)
+        except:
+            return to_hex(char)
+
+        return f"({lower} | {upper})" if lower != upper else lower
+
+
+    def wide_encoding(char: bytes):
+        if not is_nocase:
+            return to_hex(char) + " 00"
+
+        try:
+            decoded_char = chr(char)
+            if (char < 0 or char > 127) or len(decoded_char) > 1:
+                raise "Wrong decode"
+            
+            # upper or lowercasing may produce longer than 1 character things, good example is ß
+            lower = to_hex(ord(decoded_char.lower()) if len(decoded_char.lower()) == 1 else decoded_char)
+            upper = to_hex(ord(decoded_char.upper()) if len(decoded_char.upper()) == 1 else decoded_char)
+        except:
+            return to_hex(char) + " 00"
+
+        return f"({lower} | {upper}) 00" if lower != upper else lower + " 00"
+    
     s = escape_yara(s)
-    if 'ascii&wide' in encoding:
-        return "( " + " ".join(f"{ord(c):02X}" for c in s) + " | " + " 00 ".join(f"{ord(c):02X}" for c in s) + " 00" + " )"
-    if 'ascii' in encoding:
-        return " ".join(f"{ord(c):02X}" for c in s)
-    if 'wide' in encoding:
-        return " 00 ".join(f"{ord(c):02X}" for c in s) + " 00"
+
+    # Such cases may lead into regex complexity issues!
+    if is_ascii and is_wide and is_nocase and len(s) > 72:
+        is_nocase = False
+        logging.warning("[Rule warning] the rule may run into regex complexity issues: " + str(s))
+
+
+    ascii_part = " ".join(ascii_encoding(c) for c in s) if is_ascii else ""
+    wide_part = " ".join(wide_encoding(c) for c in s) if is_wide else ""
+    
+    if is_ascii and is_wide:
+        return f"(({ascii_part}) | ({wide_part}))"
+
+    return ascii_part or wide_part
+
 
 def process_yara_ruleset(yara_ruleset, strip_comments=True):
     hex_ruleset = ''
@@ -48,36 +95,44 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
             if strip_comments and 'comments' in rule:
                 del rule['comments']
 
+            # nocase        -> PARTIALLY_HANDLED (Disabled due to regex complexity)
+            # wide          -> HANDLED
+            # ascii         -> HANDLED
+            # xor           -> IGNORED
+            # base64        -> IGNORED
+            # base64wide    -> IGNORED
+            # fullword      -> IGNORED
+            # private       -> IGNORED
+            is_limited = any(x not in {"wide", "ascii"} for x in string['modifiers'])
+
             # Convert string to hex
             if 'strings' in rule:
                 for string in rule['strings']:
                     if 'type' in string and 'text' in string['type']:
                         if 'value' in string:
-                            wide, ascii = False, False
+                            is_wide, is_ascii, is_nocase = False, False, False
                             if 'modifiers' in string:
-                                wide = 'wide' in string['modifiers']
-                                ascii = 'ascii' in string['modifiers']
+                                is_wide = 'wide' in string['modifiers']
+                                is_ascii = 'ascii' in string['modifiers']
+                                is_nocase = 'nocase' in string['modifiers']
                                 del string['modifiers']
-                            if ascii and wide:
-                                encoding = 'ascii&wide'
-                            elif ascii:
-                                encoding = 'ascii'
-                            elif wide:
-                                encoding = 'wide'
-                            else:  # ascii by default when no keywords
-                                encoding = 'ascii'
-                            hex_string = string_to_hex_array(string['value'], encoding=encoding)
+                            if not is_wide and not is_ascii: # and not is_nocase:
+                                is_ascii = True
+                            hex_string = string_to_hex_array(string['value'], is_wide, is_ascii, False)
                             if hex_string:
                                 old_value = string['value']
                                 string['value'] = f'{{{hex_string}}}'
                                 string['type'] = 'hex'
-                                logging.info(f"[{rule['rule_name']}][{string['name']}] Converted string (encoding: {encoding}) to hex: {old_value} -> {string['value']}")
+                                logging.info(f"[{rule['rule_name']}][{string['name']}] Converted string (ascii: {is_ascii}, wide: {is_wide}, nocase: {is_nocase}) to hex: {old_value} -> {string['value']}")
 
             # add hardened tag
             tags = []
             if 'tags' in rule:
                 tags = rule['tags']
             tags.append('hardened')
+            if is_limited:
+                logging.warning(f"[{rule['rule_name']}] is limited in capabilities due to special string modifier")
+                tags.append('limited')
             rule['tags'] = tags
 
 
