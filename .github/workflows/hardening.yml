@@ -29,6 +29,20 @@ jobs:
     - name: pre-commit
       uses: pre-commit/action@v3.0.1
 
+    # will be changed to OIDC connection
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2
+
+    - name: Download zip from S3
+      run: |
+        aws sts get-caller-identity
+        aws s3 cp s3://yara-matching-samples/matchingsamples.zip matchingsamples.zip
+        unzip -P "infected" matchingsamples.zip
+
     # Testing hardened yara rules
     - name: Rule testing before hardening
       run: |

