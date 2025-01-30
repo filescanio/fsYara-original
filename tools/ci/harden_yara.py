@@ -9,14 +9,23 @@ from plyara.utils import rebuild_yara_rule
 
 # https://yara.readthedocs.io/en/v3.4.0/writingrules.html#text-strings
 def escape_yara(s: str) -> bytes:
-    s = re.sub(rb'\\x([a-fA-F0-9]{2})', lambda m: bytes([int(m.group(1), 16)]), s.encode())
-    
-    s = s.replace('\\"', '"')  # Double quote
-    s = s.replace('\\\\', '\\')  # Backslash
-    s = s.replace('\\t', '\t')  # Horizontal tab
-    s = s.replace('\\n', '\n')  # New line
+    s = s.encode()
 
-    # Replace hexadecimal notation (e.g., \xdd)
+    # Replace encoded hex characters
+    s = re.sub(rb'(?<!\\)\\x([a-fA-F0-9]{2})', lambda m: bytes([int(m.group(1), 16)]), s)
+
+    # Replace double quote escapes (\")
+    s = re.sub(rb'(?<!\\)\\"', b'"', s)
+
+    # Replace tab escapes (\t)
+    s = re.sub(rb'(?<!\\)\\t', b'\t', s)
+
+    # Replace newline escapes (\n)
+    s = re.sub(rb'(?<!\\)\\n', b'\n', s)
+
+    # Replace escaped backslashes (\\ → \)
+    # s = re.sub(rb'\\\\', b'\\', s)
+    s = s.replace(b'\\\\', b'\\')
 
     return s
 

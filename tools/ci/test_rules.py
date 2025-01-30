@@ -41,7 +41,7 @@ for rule_path in rulesets_orig:
     for yararule in yara_rules:
         rules[rule_path].append(yararule['rule_name'])
 
-        if 'limited' in yararule['tags']:
+        if 'tags' in yararule and 'limited' in yararule['tags']:
             limited_rules[rule_path].append(yararule['rule_name'])
 
 print("Fetched rules.")
