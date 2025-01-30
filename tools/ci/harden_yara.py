@@ -95,15 +95,8 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
             if strip_comments and 'comments' in rule:
                 del rule['comments']
 
-            # nocase        -> PARTIALLY_HANDLED (Disabled due to regex complexity)
-            # wide          -> HANDLED
-            # ascii         -> HANDLED
-            # xor           -> IGNORED
-            # base64        -> IGNORED
-            # base64wide    -> IGNORED
-            # fullword      -> IGNORED
-            # private       -> IGNORED
-            is_limited = any(x not in {"wide", "ascii"} for x in string['modifiers'])
+
+            is_limited = False
 
             # Convert string to hex
             if 'strings' in rule:
@@ -115,6 +108,10 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                 is_wide = 'wide' in string['modifiers']
                                 is_ascii = 'ascii' in string['modifiers']
                                 is_nocase = 'nocase' in string['modifiers']
+
+                                if any(x not in {"wide", "ascii", "fullword", "private"} for x in string['modifiers']):
+                                    is_limited = True
+
                                 del string['modifiers']
                             if not is_wide and not is_ascii: # and not is_nocase:
                                 is_ascii = True
@@ -130,6 +127,15 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
             if 'tags' in rule:
                 tags = rule['tags']
             tags.append('hardened')
+
+            # nocase        -> PARTIALLY_HANDLED (Disabled due to regex complexity)
+            # wide          -> HANDLED
+            # ascii         -> HANDLED
+            # xor           -> NO SUPPORT
+            # base64        -> NO SUPPORT
+            # base64wide    -> NO SUPPORT
+            # fullword      -> NO SUPPORT (IGNORED from limited)
+            # private       -> NO SUPPORT (IGNORED from limited)
             if is_limited:
                 logging.warning(f"[{rule['rule_name']}] is limited in capabilities due to special string modifier")
                 tags.append('limited')
