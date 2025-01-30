@@ -30,12 +30,19 @@ def get_ruleset(rulename, rulesets):
 
 print("Fetching rules.")
 rules = {}
+limited_rules = {}
 for rule_path in rulesets_orig:
     rules[rule_path] = []
+    limited_rules[rule_path] = []
+
     yara_parser.clear()
     yara_rules = yara_parser.parse_string(open(rule_path, 'r').read())
+
     for yararule in yara_rules:
         rules[rule_path].append(yararule['rule_name'])
+
+        if 'tags' in yararule and 'limited' in yararule['tags']:
+            limited_rules[rule_path].append(yararule['rule_name'])
 
 print("Fetched rules.")
 print(f"\tThere are a total of {sum(len(value) for value in rules.values())} rules among {len(rulesets_orig)} rulesets")
@@ -74,8 +81,11 @@ for matching_rule in rules_match:
                         if match.rule == matching_rule:
                             print("\tAll good!")
                 else:
-                    print("\tNo match...")
-                    error_rules[matching_rule] = "NO_MATCH"
+                    if ruleset in limited_rules and matching_rule not in limited_rules[ruleset]:
+                        print("\tNo match...")
+                        error_rules[matching_rule] = "NO_MATCH"
+                    else:
+                        print("\tRule is limited")
             else:
                 print(f"Matching sample {matching_sample} does not exist.")
                 error_rules[matching_rule] = "NO_SAMPLE"
