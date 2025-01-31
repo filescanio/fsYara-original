@@ -39,7 +39,6 @@ jobs:
 
     - name: Download zip from S3
       run: |
-        aws sts get-caller-identity
         aws s3 cp s3://yara-matching-samples/matchingsamples.zip matchingsamples.zip
         unzip -P "infected" matchingsamples.zip
 
@@ -66,7 +65,7 @@ jobs:
         python3 tools/ci/test_rules.py .
 
     - name: Set up SSH Key
-      # if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master'
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/id_ed25519
@@ -74,13 +73,13 @@ jobs:
         export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no"
 
     - name: Clone Target Repository
-      # if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master'
       run: |
         rm -rf target-repo
-        git clone git@github.com:filescanio/fsYara-test.git target-repo
+        git clone git@github.com:filescanio/fsYara.git target-repo
 
     - name: Commit and Push
-      # if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master'
       run: |
         find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
         rsync -avq --exclude=".*" --exclude="target-repo" --exclude="matchingsamples*" ./ target-repo
