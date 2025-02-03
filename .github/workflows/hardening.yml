@@ -1,0 +1,91 @@
+name: Push to fsYara
+
+on:
+  push:
+    branches:
+      - '**'
+
+env:
+  PLYARA_VERSION: 2.2.7
+  YARA_PYTHON_VRSION: 4.5.1
+
+jobs:
+  update-fsYara-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Repository
+      uses: actions/checkout@v3
+
+    - name: python setup
+      uses: actions/setup-python@v3
+
+    # plyara and yara installation must happen before the pre commit execution (compile.py requires it)
+    - name: Yara installation
+      run: |
+        pip3 install plyara==${PLYARA_VERSION}
+        sudo apt install yara
+
+    - name: pre-commit
+      uses: pre-commit/action@v3.0.1
+
+    # will be changed to OIDC connection
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2
+
+    - name: Download zip from S3
+      run: |
+        aws s3 cp s3://yara-matching-samples/matchingsamples.zip matchingsamples.zip
+        unzip -P "infected" matchingsamples.zip
+
+    # Testing hardened yara rules
+    - name: Rule testing before hardening
+      run: |
+        pip uninstall yara
+        pip install yara-python==${YARA_PYTHON_VRSION}
+        python3 tools/ci/test_rules.py .
+
+    # default verbosity is 30 (Critical, Error, Warning)
+    # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
+    - name: Yara hardening
+      run: |
+        python3 tools/ci/harden_yara.py .
+      
+    # Running pre-commit after hardening to make sure, that the process did not break any yara rule
+    - name: pre-commit after hardening
+      uses: pre-commit/action@v3.0.1
+
+    # Testing hardened yara rules
+    - name: Rule testing after hardening
+      run: |
+        python3 tools/ci/test_rules.py .
+
+    - name: Set up SSH Key
+      if: github.ref == 'refs/heads/master'
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.FSYARA_DEPLOY_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no"
+
+    - name: Clone Target Repository
+      if: github.ref == 'refs/heads/master'
+      run: |
+        rm -rf target-repo
+        git clone git@github.com:filescanio/fsYara.git target-repo
+
+    - name: Commit and Push
+      if: github.ref == 'refs/heads/master'
+      run: |
+        find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
+        rsync -avq --exclude=".*" --exclude="target-repo" --exclude="matchingsamples*" ./ target-repo
+        cd target-repo
+        git config user.email "bot@automation.local"
+        git config user.name "Automation Bot"
+        git add .
+        git commit -m "Automated update from source repository"
+        git push --set-upstream origin
