@@ -96,14 +96,5 @@ for rule_path in rulesets_orig:
 
 
 print(f"There are a total of {len(rules)} rules among {len(rulesets_orig)} rulesets")
-with open("rules_match", "w") as file:
+with open("rules_match.json", "w") as file:
     file.write(json.dumps(rule_match, indent=4))
-
-
-#download_file_match("hmimysProtectv10", fskey)
-
-# ahora tengo que ver cómo lanzar cada yara con yara-python contra un fichero específico
-
-#quizá debería guardar todas las muestras descargadas como regression sample para esto específicamente
-
-# what about the inhouse rules? are they deployed in a different way?

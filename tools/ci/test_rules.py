@@ -6,7 +6,7 @@ import json
 import yara
 
 rulesets_parent_dir = sys.argv[1]
-matches_file = "rules_match"
+matches_file = "rules_match.json"
 
 rulesets_orig = glob.glob(os.path.join(rulesets_parent_dir, '**', '*.yar'), recursive=True) + \
              glob.glob(os.path.join(rulesets_parent_dir, '**', '*.yara'), recursive=True)
