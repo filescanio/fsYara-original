@@ -63,6 +63,10 @@ jobs:
     - name: Rule testing after hardening
       run: |
         python3 tools/ci/test_rules.py .
+        mkdir -p target-test
+        rsync -avq --exclude=".*" --exclude="target-repo" --exclude="matchingsamples*" --exclude="tools/ci" --exclude="rules_match.json" ./ target-test
+        cd target-test
+        ls -la
 
     - name: Set up SSH Key
       if: github.ref == 'refs/heads/master'
@@ -82,7 +86,7 @@ jobs:
       if: github.ref == 'refs/heads/master'
       run: |
         find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
-        rsync -avq --exclude=".*" --exclude="target-repo" --exclude="matchingsamples*" ./ target-repo
+        rsync -avq --exclude=".*" --exclude="target-repo" --exclude="matchingsamples*" --exclude="tools/ci" --exclude="rules_match.json" ./ target-repo
         cd target-repo
         git config user.email "bot@automation.local"
         git config user.name "Automation Bot"
