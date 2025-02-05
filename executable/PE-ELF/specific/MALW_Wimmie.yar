@@ -29,8 +29,7 @@ rule WimmieStrings : Wimmie Family
         description = "Strings used by Wimmie"
         author = "Seth Hardy"
         last_modified = "2014-07-17"
-        vetted_family = "Wimmie"
-        
+
     strings:
         $ = "\x00ScriptMan"
         $ = "C:\\WINDOWS\\system32\\sysprep\\cryptbase.dll" wide ascii
@@ -48,7 +47,6 @@ rule WimmieStrings : Wimmie Family
 //        description = "Wimmie family"
 //        author = "Seth Hardy"
 //        last_modified = "2014-07-17"
-//        vetted_family = "Wimmie"
 //
 //    condition:
 //        WimmieShellcodes or WimmieStrings
