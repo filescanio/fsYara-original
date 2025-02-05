@@ -89,3 +89,4 @@ jobs:
         git add .
         git commit -m "Automated update from source repository"
         git push --set-upstream origin
+        
