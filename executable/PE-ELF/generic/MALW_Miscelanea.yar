@@ -297,7 +297,7 @@ rule Base64_encoded_Executable {
 		description = "Detects an base64 encoded executable (often embedded)"
 		author = "Florian Roth"
 		date = "2015-05-28"
-		score = 50
+		score = 60
 	strings:
 		$s1 = "TVpTAQEAAAAEAAAA//8AALgAAAA" // 14 samples in goodware archive
 		$s2 = "TVoAAAAAAAAAAAAAAAAAAAAAAAA" // 26 samples in goodware archive
