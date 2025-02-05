@@ -59,12 +59,12 @@ jobs:
     - name: pre-commit after hardening
       uses: pre-commit/action@v3.0.1
 
-    #Testing hardened yara rules
+    # Testing hardened yara rules
     - name: Rule testing after hardening
       run: |
         python3 tools/ci/test_rules.py .
         mkdir -p target-test
-        rsync -avq --exclude=".*" --exclude="target-repo" --exclude="matchingsamples*" --exclude="tools/ci" --exclude="rules_match.json" ./ target-test
+        rsync -avq --exclude=".*" --exclude="target-repo" --exclude="matchingsamples*" --exclude="tools" --exclude="rules_match.json" ./ target-test
         cd target-test
         ls -la
 
