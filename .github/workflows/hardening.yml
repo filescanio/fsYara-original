@@ -78,15 +78,16 @@ jobs:
         rm -rf target-repo
         git clone git@github.com:filescanio/fsYara.git target-repo
 
-    - name: Commit and Push
-      if: github.ref == 'refs/heads/master'
-      run: |
-        find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
-        rsync -avq --exclude=".*" --exclude="target-repo" --exclude="matchingsamples*" --exclude="tools" --exclude="rules_match.json" ./ target-repo
-        cd target-repo
-        git config user.email "bot@automation.local"
-        git config user.name "Automation Bot"
-        git add .
-        git commit -m "Automated update from source repository"
-        git push --set-upstream origin
+    # - name: Commit and Push
+    #   if: github.ref == 'refs/heads/master'
+    #   run: |
+    #     find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
+    #     rsync -avq --exclude=".*" --exclude="target-repo" --exclude="matchingsamples*" --exclude="tools" --exclude="rules_match.json" ./ target-repo
+    #     cd target-repo
+    #     git config user.email "bot@automation.local"
+    #     git config user.name "Automation Bot"
+    #     git add .
+    #     git commit -m "Automated update from source repository"
+    #     git push --set-upstream origin
+
         
