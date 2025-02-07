@@ -248,7 +248,7 @@
     "WindowsShell_s4": null,
     "WindowsShell_Gen": "12c80092e7df5c4cf295eadeb12a713bd791372dad2e3677f04a1676fb2b9779",
     "WindowsShell_Gen2": "12c80092e7df5c4cf295eadeb12a713bd791372dad2e3677f04a1676fb2b9779",
-    "Turla_APT_Malware_Gen2": "9fe15c38e56acc99401c37a308ea648cf89901ba31148805e1fff5a73b19bc94",
+    "RUAG_APT_Malware_Gen2": "9fe15c38e56acc99401c37a308ea648cf89901ba31148805e1fff5a73b19bc94",
     "RUAG_Tavdig_Malformed_Executable": null,
     "RUAG_Bot_Config_File": null,
     "RUAG_Cobra_Malware": null,
