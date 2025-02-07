@@ -70,8 +70,7 @@ rule Turla_APT_Malware_Gen1 {
 		or ( 12 of them )
 }
 
-// Duplicated
-/*rule RUAG_APT_Malware_Gen2 {
+rule RUAG_APT_Malware_Gen2 {
    meta:
       description = "Detects malware used in the RUAG APT case"
       author = "Florian Roth (Nextron Systems)"
@@ -106,7 +105,7 @@ rule Turla_APT_Malware_Gen1 {
    condition:
       ( uint16(0) == 0x5a4d and filesize < 2000KB and ( 1 of ($x*) or 5 of ($s*) ) )
       or ( 10 of them )
-}*/
+}
 
 rule Turla_APT_Malware_Gen3 {
 	meta:
