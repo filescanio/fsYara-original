@@ -1,16 +1,4 @@
-rule justXworm {
-    meta:
-        author = "RussianPanda"
-        description = "Detects XWorm RAT"
-        vetted_family = "xworm"
-        score = 75
-        date = "3/11/2024"
-        hash = "fc422800144383ef6e2e0eee37e7d6ba"
-    strings:
-        $s1 = "xworm" wide ascii nocase
-    condition:
-        uint16(0) == 0x5A4D and all of them
-}
+import "pe"
 
 rule xworm : refined {
     meta:
