@@ -75,6 +75,7 @@ rule malware_Stealc_str {
         author = "JPCERT/CC Incident Response Group"
         hash = "c9bcdc77108fd94f32851543d38be6982f3bb611c3a1115fc90013f965ed0b66"
 
+
     strings:
         $decode_code = {
           68 D0 07 00 00
