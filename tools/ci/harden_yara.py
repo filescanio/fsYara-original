@@ -29,7 +29,8 @@ def escape_yara(s: str) -> bytes:
 
     return s
 
-def string_to_hex_array(s, is_wide, is_ascii, is_nocase):
+
+def string_to_hex_array(s, is_wide, is_ascii, is_nocase, is_xor, xor_vals):
     def to_hex(b):
         return f"{b:02x}"
     
@@ -52,9 +53,6 @@ def string_to_hex_array(s, is_wide, is_ascii, is_nocase):
 
 
     def wide_encoding(char: bytes):
-        if not is_nocase:
-            return to_hex(char) + " 00"
-
         try:
             decoded_char = chr(char)
             if (char < 0 or char > 127) or len(decoded_char) > 1:
@@ -68,6 +66,45 @@ def string_to_hex_array(s, is_wide, is_ascii, is_nocase):
 
         return f"({lower} | {upper}) 00" if lower != upper else lower + " 00"
     
+
+    def xor_encoding(xormin, xormax):
+        max_or = 60
+        #note that yara does not allow to combine xor with nocase, so no need to consider nocase
+        if xormax - xormin > max_or: # cant include all xored values, too large
+            xormax = xormin + max_or
+            if is_wide and is_ascii:
+                xormax = xormin + max_or/2
+            logging.warning(f"[Rule warning] xored limited to {max_or} xor key values for string: " + str(s))
+            logging.warning(f"[Rule warning] The rule may low slow down scanning" + str(s))
+        cur = xormin
+        ret_str = ""
+        ret_str_wide = ""
+        try:
+            while cur <= xormax:
+                ret_str = f"{ret_str}("
+                ret_str_wide = f"{ret_str_wide}("
+                for c in s:
+                    xored_char = c ^ cur
+                    if is_ascii:
+                        ret_str = f"{ret_str} {xored_char:02x}"
+                    if is_wide:
+                        ret_str_wide = f"{ret_str_wide} {xored_char:02x} {cur:02x}"
+                if is_ascii:
+                    ret_str = f"{ret_str}) |"
+                if is_wide:
+                  ret_str_wide = f"{ret_str_wide}) |"
+                cur += 1
+        except:
+            pass
+
+        if is_ascii:
+            if is_wide:
+                return f"{ret_str[:-1]} | {ret_str_wide[:-1]}" # ascii and wide
+            return f"{ret_str[:-1]}" # only ascii
+        else:
+            return f"{ret_str_wide[:-1]}" #only wide
+
+
     s = escape_yara(s)
 
     # Such cases may lead into regex complexity issues!
@@ -75,12 +112,19 @@ def string_to_hex_array(s, is_wide, is_ascii, is_nocase):
         is_nocase = False
         logging.warning("[Rule warning] the rule may run into regex complexity issues: " + str(s))
 
+    xored_parts = xor_encoding(xor_vals[0], xor_vals[1]) if is_xor else ""
+
+    if is_xor and xored_parts:
+        # Need to convert to wide if necessary
+        return f"({xored_parts})" # If the xor mod is used, we do not care about returning the plaintext ascii/wide
 
     ascii_part = " ".join(ascii_encoding(c) for c in s) if is_ascii else ""
     wide_part = " ".join(wide_encoding(c) for c in s) if is_wide else ""
-    
+
     if is_ascii and is_wide:
         return f"(({ascii_part}) | ({wide_part}))"
+
+
 
     return ascii_part or wide_part
 
@@ -96,7 +140,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
         logging.error("[Parsing error] Invalid YARA syntax")
         success = False
         hex_ruleset = "// Removed content due to invalid YARA syntax" # leave a comment in the yara file
-        return hex_ruleset
+        return hex_ruleset, success
 
     for rule in rules:
         try:
@@ -118,14 +162,35 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                 is_wide = 'wide' in string['modifiers']
                                 is_ascii = 'ascii' in string['modifiers']
                                 is_nocase = 'nocase' in string['modifiers']
+                                is_xor = False
+                                xor_vals = None
 
                                 if any(x not in {"wide", "ascii", "fullword", "private"} for x in string['modifiers']):
                                     is_limited = True
 
-                                del string['modifiers']
-                            if not is_wide and not is_ascii: # and not is_nocase:
+                            if not is_wide and not is_ascii:
                                 is_ascii = True
-                            hex_string = string_to_hex_array(string['value'], is_wide, is_ascii, False)
+
+                            try:
+                                for mod in string['modifiers']:
+                                    if "xor" in mod:
+                                        is_xor = True
+                                        if "xor" == mod:
+                                            xor_vals = (0, 255)
+                                            break
+                                        else:
+                                            xor_pattern = r"xor\((0x[0-9A-Fa-f]{2})-(0x[0-9A-Fa-f]{2})\)"
+                                            match = re.search(xor_pattern, mod)
+                                            if match:
+                                                xor_vals = (int(match.group(1), 16), int(match.group(2), 16))
+                                                break
+                                            else:
+                                                is_xor = False # This should not be possible anyway at this point, but just in case
+                            except:
+                                logging.info(f"Error when parsing xor modifier")
+
+                            del string['modifiers']
+                            hex_string = string_to_hex_array(string['value'], is_wide, is_ascii, False, is_xor, xor_vals)
                             if hex_string:
                                 old_value = string['value']
                                 string['value'] = f'{{{hex_string}}}'
@@ -141,7 +206,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
             # nocase        -> PARTIALLY_HANDLED (Disabled due to regex complexity)
             # wide          -> HANDLED
             # ascii         -> HANDLED
-            # xor           -> NO SUPPORT
+            # xor           -> PARTIALLY_HANDLED (restricted number of xor keys)
             # base64        -> NO SUPPORT
             # base64wide    -> NO SUPPORT
             # fullword      -> NO SUPPORT (IGNORED from limited)
@@ -154,11 +219,11 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
 
             # add hardened yara rule
             hex_ruleset += rebuild_yara_rule(rule, condition_indents=False) + '\n'
-        except:
+        except Exception as e:
             # error hardening a yara rule
             # only drop problematic yara rule, not the yara ruleset
             if rule and 'rule_name' in rule:
-                logging.error(f"[Hardening error] Erroneous yara rule {rule['rule_name']} containing invalid YARA syntax")
+                logging.error(f"[Hardening error] Erroneous yara rule {rule['rule_name']} may contain invalid YARA syntax")
                 success = False
 
     # test hardened yara ruleset
@@ -169,7 +234,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
         # invalid yara ruleset
         logging.error("[Hardening error] Invalid YARA syntax after hardening")
         success = False
-        hex_ruleset = "// Content could not be hardened properly" # leave a comment in the yara file
+        #hex_ruleset = "// Content could not be hardened properly" # leave a comment in the yara file
 
     return hex_ruleset, success
 
@@ -195,6 +260,9 @@ def process_file(ruleset, input_file, output_file, strip_comments=True):
         
 def traverse_and_process(input_folder, output_prefix=None, strip_comments=True):
     hardening_success = True
+    if not os.path.isdir(input_folder):
+        print(f"Input folder does not exist!")
+        return
     for root, _, files in os.walk(input_folder):
         for file in files:
             if file.endswith(".yar") or file.endswith(".yara"):
@@ -213,7 +281,7 @@ def traverse_and_process(input_folder, output_prefix=None, strip_comments=True):
     if hardening_success:
         print(f"Yara hardening process completed successfully!")
     else:
-        logging.error("Yara hardening process failed!")
+        logging.error("Yara hardening process failed for at least one rule!")
         sys.exit(1)
 
 def delete_files_in_yara_folder(root_dir):
