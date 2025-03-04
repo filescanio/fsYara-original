@@ -157,39 +157,40 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                 for string in rule['strings']:
                     if 'type' in string and 'text' in string['type']:
                         if 'value' in string:
-                            is_wide, is_ascii, is_nocase = False, False, False
+                            is_wide, is_ascii, is_nocase, is_xor = False, False, False, False
+                            xor_vals = None
                             if 'modifiers' in string:
                                 is_wide = 'wide' in string['modifiers']
                                 is_ascii = 'ascii' in string['modifiers']
                                 is_nocase = 'nocase' in string['modifiers']
-                                is_xor = False
-                                xor_vals = None
 
                                 if any(x not in {"wide", "ascii", "fullword", "private"} for x in string['modifiers']):
                                     is_limited = True
 
-                            if not is_wide and not is_ascii:
-                                is_ascii = True
+                                if not is_wide and not is_ascii:
+                                    is_ascii = True
 
-                            try:
-                                for mod in string['modifiers']:
-                                    if "xor" in mod:
-                                        is_xor = True
-                                        if "xor" == mod:
-                                            xor_vals = (0, 255)
-                                            break
-                                        else:
-                                            xor_pattern = r"xor\((0x[0-9A-Fa-f]{2})-(0x[0-9A-Fa-f]{2})\)"
-                                            match = re.search(xor_pattern, mod)
-                                            if match:
-                                                xor_vals = (int(match.group(1), 16), int(match.group(2), 16))
+                                try:
+                                    for mod in string['modifiers']:
+                                        if "xor" in mod:
+                                            is_xor = True
+                                            if "xor" == mod:
+                                                xor_vals = (0, 255)
                                                 break
                                             else:
-                                                is_xor = False # This should not be possible anyway at this point, but just in case
-                            except:
-                                logging.info(f"Error when parsing xor modifier")
+                                                xor_pattern = r"xor\((0x[0-9A-Fa-f]{2})-(0x[0-9A-Fa-f]{2})\)"
+                                                match = re.search(xor_pattern, mod)
+                                                if match:
+                                                    xor_vals = (int(match.group(1), 16), int(match.group(2), 16))
+                                                    break
+                                                else:
+                                                    is_xor = False # This should not be possible anyway at this point, but just in case
+                                except:
+                                    logging.info(f"Error when parsing xor modifier")
 
-                            del string['modifiers']
+                                del string['modifiers']
+                            else: # No modifiers at all => ascii
+                                is_ascii = True
                             hex_string = string_to_hex_array(string['value'], is_wide, is_ascii, False, is_xor, xor_vals)
                             if hex_string:
                                 old_value = string['value']
