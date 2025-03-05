@@ -53,6 +53,8 @@ def string_to_hex_array(s, is_wide, is_ascii, is_nocase, is_xor, xor_vals):
 
 
     def wide_encoding(char: bytes):
+        if not is_nocase:
+            return to_hex(char) + " 00"
         try:
             decoded_char = chr(char)
             if (char < 0 or char > 127) or len(decoded_char) > 1:
