@@ -188,7 +188,9 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                                 else:
                                                     is_xor = False # This should not be possible anyway at this point, but just in case
                                 except:
-                                    logging.info(f"Error when parsing xor modifier")
+                                    logging.error("[Hardening error] Error when parsing xor modifier")
+                                    raise "Error parsing xor modifier"
+
 
                                 del string['modifiers']
                             else: # No modifiers at all => ascii
