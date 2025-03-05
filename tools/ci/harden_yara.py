@@ -167,6 +167,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                 is_nocase = 'nocase' in string['modifiers']
 
                                 if any(x not in {"wide", "ascii", "fullword", "private"} for x in string['modifiers']):
+                                    # xor will be always marked as limited, even though in some cases may not he limited
                                     is_limited = True
 
                                 if not is_wide and not is_ascii:
@@ -180,7 +181,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                                 xor_vals = (0, 255)
                                                 break
                                             else:
-                                                xor_pattern = r"xor\((0x[0-9A-Fa-f]{2})-(0x[0-9A-Fa-f]{2})\)"
+                                                xor_pattern = r"xor\( *(0x[0-9A-Fa-f]{2}) *- *(0x[0-9A-Fa-f]{2} *)\)"
                                                 match = re.search(xor_pattern, mod)
                                                 if match:
                                                     xor_vals = (int(match.group(1), 16), int(match.group(2), 16))
