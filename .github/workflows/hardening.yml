@@ -51,7 +51,6 @@ jobs:
 
     - name: Create matches script
       run: |
-        pip install -r tools/ci/requirements.txt
         python3 -m pip install -r tools/ci/requirements.txt
         python3 tools/ci/create_matches.py -p . -o matches.json
 
