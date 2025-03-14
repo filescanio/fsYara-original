@@ -52,7 +52,7 @@ jobs:
     - name: Create matches script
       run: |
         python3 -m pip install -r tools/ci/requirements.txt
-        python3 tools/ci/create_matches.py -y . -o matches.json -s infected
+        python3 tools/ci/create_matches.py -y . -s infected -o matches.json
 
     # default verbosity is 30 (Critical, Error, Warning)
     # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
@@ -71,7 +71,7 @@ jobs:
 
     - name: Create matches script after hardening
       run: |
-        python3 tools/ci/create_matches.py -p . -H hardened.json
+        python3 tools/ci/create_matches.py -y . -s infected -o hardened.json
         python3 tools/ci/compare_matches.py -o original.json -H hardened.json
 
     - name: Set up SSH Key
