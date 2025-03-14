@@ -3,31 +3,29 @@ from collections import defaultdict
 import json
 from posixpath import basename
 from typing import Iterator
-import zipfile
 from concurrent.futures import ThreadPoolExecutor as tpe
-from boto3.session import Session
 
 import yara
 
 from pathlib import Path
 
 
-def download_samples() -> Path:
-    tmp_dir = Path("tmp/matchingsamples")
-    if not tmp_dir.exists():
-        tmp_dir.mkdir(parents=True, exist_ok=True)
+# def download_samples() -> Path:
+#     tmp_dir = Path("tmp/matchingsamples")
+#     if not tmp_dir.exists():
+#         tmp_dir.mkdir(parents=True, exist_ok=True)
 
-        print("> Downloading samples")
-        session = Session()
-        client = session.client(service_name="s3")
-        zip = Path("tmp/samples.zip")
-        client.download_file("yara-matching-samples", "matchingsamples.zip", zip)
+#         print("> Downloading samples")
+#         session = Session()
+#         client = session.client(service_name="s3")
+#         zip = Path("tmp/samples.zip")
+#         client.download_file("yara-matching-samples", "matchingsamples.zip", zip)
 
-        print("> Extracting samples")
-        with zipfile.ZipFile(zip, "r") as zip_ref:
-            zip_ref.extractall(tmp_dir, pwd=b"infected")
+#         print("> Extracting samples")
+#         with zipfile.ZipFile(zip, "r") as zip_ref:
+#             zip_ref.extractall(tmp_dir, pwd=b"infected")
 
-    return tmp_dir
+#     return tmp_dir
 
 
 def get_yara_files(yara_dir: Path) -> list[Path]:
@@ -36,11 +34,13 @@ def get_yara_files(yara_dir: Path) -> list[Path]:
 
 def get_yara_matches(yara_path: Path, samples_path: Path) -> dict[str, list[str]]:
     yara_files = get_yara_files(yara_path)
-    samples = list(samples_path.rglob("*"))
+    samples = [p for p in samples_path.rglob("*") if p.is_file()]
+    print(yara_files)
 
     def matches(yara_file: Path) -> dict:
         result = defaultdict(list)
         compiled = yara.compile(str(yara_file))
+        print(f"> Checking matches on {basename(yara_file)}")
         for sample in samples:
             matches = compiled.match(str(sample))
             for m in matches:
@@ -65,12 +65,12 @@ def write_json(matches: dict, filename: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path", "-p", type=Path, default="./")
+    parser.add_argument("--yara-path", "-y", type=Path, default="./")
+    parser.add_argument("--samples-path", "-s", type=Path, default="./")
     parser.add_argument("--output", "-o", type=Path, required=True)
     args = parser.parse_args()
 
-    samples = download_samples()
     print("> Searching for matches")
-    matches = get_yara_matches(args.path, samples)
+    matches = get_yara_matches(args.yara_path, args.samples_path)
     print("> Writing matches into", args.output)
     write_json(matches, args.output)
