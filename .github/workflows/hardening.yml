@@ -52,7 +52,7 @@ jobs:
     - name: Create matches script
       run: |
         python3 -m pip install -r tools/ci/requirements.txt
-        python3 tools/ci/create_matches.py -p . -o matches.json -y infected
+        python3 tools/ci/create_matches.py -y . -o matches.json -s infected
 
     # default verbosity is 30 (Critical, Error, Warning)
     # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
