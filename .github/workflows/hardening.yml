@@ -72,7 +72,7 @@ jobs:
     - name: Create matches script after hardening
       run: |
         python3 tools/ci/create_matches.py -y . -s infected -o hardened.json
-        python3 tools/ci/compare_matches.py -o matches.json -H hardened.json -e errors.json
+        python3 tools/ci/compare_matches.py -o matches.json -H hardened.json
         mkdir -p results
         cp matches.json results/original.json
         cp hardened.json results/hardened.json
