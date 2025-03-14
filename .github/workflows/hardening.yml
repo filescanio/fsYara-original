@@ -72,7 +72,13 @@ jobs:
     - name: Create matches script after hardening
       run: |
         python3 tools/ci/create_matches.py -y . -s infected -o hardened.json
-        python3 tools/ci/compare_matches.py -o matches.json -H hardened.json
+        python3 tools/ci/compare_matches.py -o matches.json -H hardened.json -e errors.json
+        mkdir -p results
+        cp matches.json results/original.json
+        cp hardened.json results/hardened.json
+        cp errors.json results/errors.json
+        tar -czf results.tar.gz results
+        aws s3 cp results.tar.gz s3://yara-matching-samples/results.tar.gz
 
     - name: Set up SSH Key
       if: github.ref == 'refs/heads/master'
