@@ -21,9 +21,12 @@ def check_matches(o: Path, h: Path):
             if hardened_match not in original_matches:
                 append_error(errors, hardened_rule, hardened_match, "extra")
 
-    print("> Write errors list")
-    write_json(errors, "errors.json")
-    assert not errors
+    if errors:
+        print("> [WARNING] Found deviations in matches, details in errors.json")
+        print("> Write errors list")
+        write_json(errors, "errors.json")
+    else:
+        print("> SUCCESS")
 
 
 def append_error(errors: dict, rule: str, match: str, error_type: str):

@@ -34,8 +34,14 @@ def get_yara_files(yara_dir: Path) -> list[Path]:
 
 def get_yara_matches(yara_path: Path, samples_path: Path) -> dict[str, list[str]]:
     yara_files = get_yara_files(yara_path)
+    if not yara_files:
+        raise ValueError(f"> No YARA files found in {yara_path}")
+    print(f"> Found {len(yara_files)} YARA files in {yara_path}")
+
     samples = [p for p in samples_path.rglob("*") if p.is_file()]
-    print(yara_files)
+    if not samples:
+        raise ValueError(f"> No samples found in {samples_path}")
+    print(f"> Found {len(samples)} samples in {samples_path}")
 
     def matches(yara_file: Path) -> dict:
         result = defaultdict(list)
@@ -55,6 +61,10 @@ def get_yara_matches(yara_path: Path, samples_path: Path) -> dict[str, list[str]
     for partial_result in partial_results():
         for rule, partial_matches in partial_result.items():
             final_matches[rule].extend(partial_matches)
+
+    if not final_matches:
+        raise ValueError("> No matches found")
+
     return final_matches
 
 
