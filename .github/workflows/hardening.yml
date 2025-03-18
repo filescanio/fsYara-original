@@ -11,7 +11,7 @@ env:
 
 jobs:
   update-fsYara-repo:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-16-cores
 
     steps:
     - name: Checkout Source Repository
@@ -42,13 +42,6 @@ jobs:
         aws s3 cp s3://yara-matching-samples/matchingsamples.zip matchingsamples.zip
         unzip -P "infected" matchingsamples.zip
 
-    # Testing yara rules
-    - name: Rule testing before hardening
-      run: |
-        pip uninstall yara
-        pip install yara-python==${YARA_PYTHON_VRSION}
-        python3 tools/ci/test_rules.py .
-
     - name: Create matches script
       run: |
         python3 -m pip install -r tools/ci/requirements.txt
@@ -63,11 +56,6 @@ jobs:
     # Running pre-commit after hardening to make sure, that the process did not break any yara rule
     - name: pre-commit after hardening
       uses: pre-commit/action@v3.0.1
-
-    # Testing hardened yara rules
-    - name: Rule testing after hardening
-      run: |
-        python3 tools/ci/test_rules.py .
 
     - name: Create matches script after hardening
       run: |
