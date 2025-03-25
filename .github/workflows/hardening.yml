@@ -65,6 +65,7 @@ jobs:
         cp matches.json results/original.json
         cp hardened.json results/hardened.json
         cp errors.json results/errors.json
+        cp limited_errors.json results/limited_errors.json
         tar -czf results.tar.gz results
         aws s3 cp results.tar.gz s3://yara-matching-samples/results.tar.gz
 
