@@ -11,6 +11,7 @@ matches_file = "rules_match.json"
 rulesets_orig = glob.glob(os.path.join(rulesets_parent_dir, '**', '*.yar'), recursive=True) + \
              glob.glob(os.path.join(rulesets_parent_dir, '**', '*.yara'), recursive=True)
 
+
 print(f"Read {len(rulesets_orig)} rulesets.")
 
 yara_parser = plyara.Plyara()
