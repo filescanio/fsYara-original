@@ -153,7 +153,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
 
     for rule in rules:
         try:
-            tags = []
+            loosen = False
             # Remove comments from metadata
             # Note that the parser removes already all the comments (including multiline ones) by itself
             if strip_comments and 'comments' in rule:
@@ -185,7 +185,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                 if is_ascii and is_wide and is_fullword:
                                     # It will be limited in the sense that it will match extra files instead of missing matches
                                     # So it is a more loose rule / less strict, for ignoring the fullword modifier
-                                    tags.append('loosened')
+                                    loosen = True
                                     is_fullword = False
 
                                 try:
@@ -219,9 +219,12 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                 logging.info(f"[{rule['rule_name']}][{string['name']}] Converted string (ascii: {is_ascii}, wide: {is_wide}, nocase: {is_nocase}) to hex: {old_value} -> {string['value']}")
 
             # add hardened tag
+            tags = []
             if 'tags' in rule:
                 tags = rule['tags']
             tags.append('hardened')
+            if loosen:
+                tags.append('loosened')
 
             # nocase        -> PARTIALLY_HANDLED (Disabled due to regex complexity)
             # wide          -> HANDLED
