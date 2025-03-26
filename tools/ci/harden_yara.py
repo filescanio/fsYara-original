@@ -153,6 +153,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
 
     for rule in rules:
         try:
+            tags = []
             # Remove comments from metadata
             # Note that the parser removes already all the comments (including multiline ones) by itself
             if strip_comments and 'comments' in rule:
@@ -218,7 +219,6 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                 logging.info(f"[{rule['rule_name']}][{string['name']}] Converted string (ascii: {is_ascii}, wide: {is_wide}, nocase: {is_nocase}) to hex: {old_value} -> {string['value']}")
 
             # add hardened tag
-            tags = []
             if 'tags' in rule:
                 tags = rule['tags']
             tags.append('hardened')
@@ -243,6 +243,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
             # error hardening a yara rule
             # only drop problematic yara rule, not the yara ruleset
             if rule and 'rule_name' in rule:
+                #print(e)
                 logging.error(f"[Hardening error] Erroneous yara rule {rule['rule_name']} may contain invalid YARA syntax")
                 success = False
 
