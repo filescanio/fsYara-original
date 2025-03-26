@@ -181,6 +181,12 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                 if not is_wide and not is_ascii:
                                     is_ascii = True
 
+                                if is_ascii and is_wide and is_fullword:
+                                    # It will be limited in the sense that it will match extra files instead of missing matches
+                                    # So it is a more loose rule / less strict, for ignoring the fullword modifier
+                                    tags.append('loosened')
+                                    is_fullword = False
+
                                 try:
                                     for mod in string['modifiers']:
                                         if "xor" in mod:
