@@ -30,7 +30,7 @@ def escape_yara(s: str) -> bytes:
     return s
 
 
-def string_to_hex_array(s, is_wide, is_ascii, is_nocase, is_xor, xor_vals):
+def string_to_hex_array(s, is_wide, is_ascii, is_nocase, is_xor, xor_vals, is_fullword):
     def to_hex(b):
         return f"{b:02x}"
     
@@ -123,9 +123,16 @@ def string_to_hex_array(s, is_wide, is_ascii, is_nocase, is_xor, xor_vals):
     ascii_part = " ".join(ascii_encoding(c) for c in s) if is_ascii else ""
     wide_part = " ".join(wide_encoding(c) for c in s) if is_wide else ""
 
+    if is_fullword:
+        ascii_delimit = "(bf | a1 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 2a | 2b | 2c | 2d | 2e | 2f | 3a | 3b | 3c | 3d | 3e | 3f | 40 | 5b | 5c | 5d | 5e | 5f | 60 | 7b | 7c | 7d | 7e | 20 | 09 | 0a | 0d | 0b | 0c | 00 | ff)"
+        wide_delimit = "(bf 00 | a1 00 | 21 00 | 22 00 | 23 00 | 24 00 | 25 00 | 26 00 | 27 00 | 28 00 | 29 00 | 2a 00 | 2b 00 | 2c 00 | 2d 00 | 2e 00 | 2f 00 | 3a 00 | 3b 00 | 3c 00 | 3d 00 | 3e 00 | 3f 00 | 40 00 | 5b 00 | 5c 00 | 5d 00 | 5e 00 | 5f 00 | 60 00 | 7b 00 | 7c 00 | 7d 00 | 7e 00 | 20 00 | 09 00 | 0a 00 | 0d 00 | 0b 00 | 0c 00 | 00 00 | ff)"
+        if is_ascii:
+            ascii_part = f"{ascii_delimit} {ascii_part} {ascii_delimit}"
+        if is_wide:
+            wide_part = f"{wide_delimit} {wide_part} {wide_delimit}"
+
     if is_ascii and is_wide:
         return f"(({ascii_part}) | ({wide_part}))"
-
 
 
     return ascii_part or wide_part
@@ -146,6 +153,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
 
     for rule in rules:
         try:
+            loosen = False
             # Remove comments from metadata
             # Note that the parser removes already all the comments (including multiline ones) by itself
             if strip_comments and 'comments' in rule:
@@ -159,19 +167,26 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                 for string in rule['strings']:
                     if 'type' in string and 'text' in string['type']:
                         if 'value' in string:
-                            is_wide, is_ascii, is_nocase, is_xor = False, False, False, False
+                            is_wide, is_ascii, is_nocase, is_xor, is_fullword = False, False, False, False, False
                             xor_vals = None
                             if 'modifiers' in string:
                                 is_wide = 'wide' in string['modifiers']
                                 is_ascii = 'ascii' in string['modifiers']
                                 is_nocase = 'nocase' in string['modifiers']
+                                is_fullword = 'fullword' in string['modifiers']
 
-                                if any(x not in {"wide", "ascii", "fullword", "private"} for x in string['modifiers']):
+                                if any(x not in {"wide", "ascii", "private"} for x in string['modifiers']):
                                     # xor will be always marked as limited, even though in some cases may not he limited
                                     is_limited = True
 
                                 if not is_wide and not is_ascii:
                                     is_ascii = True
+
+                                if is_ascii and is_wide and is_fullword:
+                                    # It will be limited in the sense that it will match extra files instead of missing matches
+                                    # So it is a more loose rule / less strict, for ignoring the fullword modifier
+                                    loosen = True
+                                    is_fullword = False
 
                                 try:
                                     for mod in string['modifiers']:
@@ -196,7 +211,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
                                 del string['modifiers']
                             else: # No modifiers at all => ascii
                                 is_ascii = True
-                            hex_string = string_to_hex_array(string['value'], is_wide, is_ascii, False, is_xor, xor_vals)
+                            hex_string = string_to_hex_array(string['value'], is_wide, is_ascii, False, is_xor, xor_vals, is_fullword)
                             if hex_string:
                                 old_value = string['value']
                                 string['value'] = f'{{{hex_string}}}'
@@ -208,6 +223,8 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
             if 'tags' in rule:
                 tags = rule['tags']
             tags.append('hardened')
+            if loosen:
+                tags.append('loosened')
 
             # nocase        -> PARTIALLY_HANDLED (Disabled due to regex complexity)
             # wide          -> HANDLED
@@ -215,7 +232,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
             # xor           -> PARTIALLY_HANDLED (restricted number of xor keys)
             # base64        -> NO SUPPORT
             # base64wide    -> NO SUPPORT
-            # fullword      -> NO SUPPORT (IGNORED from limited)
+            # fullword      -> PARTIALLY_HANDLED - limited
             # private       -> NO SUPPORT (IGNORED from limited)
             if is_limited:
                 logging.warning(f"[{rule['rule_name']}] is limited in capabilities due to special string modifier")
@@ -229,6 +246,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
             # error hardening a yara rule
             # only drop problematic yara rule, not the yara ruleset
             if rule and 'rule_name' in rule:
+                #print(e)
                 logging.error(f"[Hardening error] Erroneous yara rule {rule['rule_name']} may contain invalid YARA syntax")
                 success = False
 
