@@ -38,9 +38,18 @@ def check_matches(o: Path, h: Path, ht: Path):
         print("> [WARNING] Found deviations in matches, details in errors.json")
         print("> Write errors list")
         write_json(errors, "errors.json")
+
+    if limited_errors:
+        print("> [WARNING] Found deviations in matches [limited], details in limited_errors.json")
+        print("> Write limited errors list")
         write_json(limited_errors, "limited_errors.json")
-    else:
-        print("> SUCCESS")
+
+    if not errors:
+        if not limited_errors:
+            print("> SUCCESS")
+        else:
+            print("> LIMITED SUCCESS")
+
 
 
 def append_error(errors: dict, rule: str, match: str, error_type: str):
