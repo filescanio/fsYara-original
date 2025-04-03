@@ -11,7 +11,7 @@ env:
 
 jobs:
   update-fsYara-repo:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-m
 
     steps:
     - name: Checkout Source Repository
