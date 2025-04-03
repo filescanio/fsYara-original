@@ -42,12 +42,10 @@ jobs:
         aws s3 cp s3://yara-matching-samples/matchingsamples.zip matchingsamples.zip
         unzip -P "infected" matchingsamples.zip
 
-    # Testing hardened yara rules
-    - name: Rule testing before hardening
+    - name: Create matches script
       run: |
-        pip uninstall yara
-        pip install yara-python==${YARA_PYTHON_VRSION}
-        python3 tools/ci/test_rules.py .
+        python3 -m pip install -r tools/ci/requirements.txt
+        python3 tools/ci/create_matches.py -y . -s matchingsamples -o matches.json
 
     # default verbosity is 30 (Critical, Error, Warning)
     # use -v / --verbose to increase verbosity to info (-v -v to switch on Debug mode)
@@ -59,10 +57,17 @@ jobs:
     - name: pre-commit after hardening
       uses: pre-commit/action@v3.0.1
 
-    # Testing hardened yara rules
-    - name: Rule testing after hardening
+    - name: Create matches script after hardening
       run: |
-        python3 tools/ci/test_rules.py .
+        python3 tools/ci/create_matches.py -y . -s matchingsamples -o hardened.json
+        python3 tools/ci/compare_matches.py -o matches.json -H hardened.json
+        mkdir -p results
+        cp matches.json results/original.json
+        cp hardened.json results/hardened.json
+        cp errors.json results/errors.json
+        cp limited_errors.json results/limited_errors.json
+        tar -czf results.tar.gz results
+        aws s3 cp results.tar.gz s3://yara-matching-samples/results.tar.gz
 
     - name: Set up SSH Key
       if: github.ref == 'refs/heads/master'
