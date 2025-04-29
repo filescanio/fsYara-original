@@ -101,10 +101,10 @@ rule pe_number_of_sections_uncommon
 }
 
 
-rule pe_purely_virtual_executable_section
+rule pe_purely_vrtl_executable_section
 {
     meta:
-        description = "PE section is executable, purely virtual (SizeOfRawData == 0)"
+        description = "PE section is executable, purely vrtl (SizeOfRawData == 0)"
         score = 50
 
     condition:
@@ -135,10 +135,10 @@ rule pe_purely_physical_section
             )
 }
 
-rule pe_unbalanced_virtual_physical_ratio
+rule pe_unbalanced_vrtl_physical_rtio
 {
     meta:
-        description = "PE section with large difference between physical and virtual size"
+        description = "PE section with large difference between physical and vrtl size"
         score = 50
 
     condition:
@@ -228,10 +228,10 @@ rule pe_code_section_and_no_executable
             )
 }
 
-rule pe_high_entropy_section
+rule pe_high_ntrpy_section
 {
     meta:
-        description = "PE file with section entropy higher than 7"
+        description = "PE file with section ntrpy higher than 7"
         score = 50
 
     condition:
@@ -266,7 +266,7 @@ rule pe_high_entropy_section
 rule pe_overlapping_sections
 {
     meta:
-        description = "PE sections have overlapping virtual or raw addresses"
+        description = "PE sections have overlapping vrtl or raw addresses"
         score = 50
 
     condition:
@@ -481,10 +481,10 @@ rule pe_signature_expires_soon
 ///// resources, overlay, and embedded files /////
 
 
-rule pe_high_entropy_resource_no_image
+rule pe_high_ntrpy_resource_no_image
 {
     meta:
-        description = "PE with embedded resource with high entropy (rcdata)"
+        description = "PE with embedded resource with high ntrpy (rcdata)"
         score = 50
 
     condition:
@@ -508,10 +508,10 @@ rule pe_large_overlay
         pe.overlay.size > 20480 // 20KB
 }
 
-rule pe_high_entropy_overlay
+rule pe_high_ntrpy_overlay
 {
     meta:
-        description = "PE overlay with high entropy"
+        description = "PE overlay with high ntrpy"
         score = 50
 
     strings:
