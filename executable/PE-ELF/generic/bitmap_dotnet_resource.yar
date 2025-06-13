@@ -5,6 +5,7 @@ rule bitmap_dotnet_packer {
         author = "ppt0"
         description = "Hunt potential .NET packer - stego bitmap in .NET resource. Key is presented as hexadecimal string"
         score = 50
+        tags = "bitmap,stego"
     strings:
         $net_subresource_magic_number = { 40 00 01 00 00 00 FF FF FF } // used as dotnet.resources does not handle sub resources
         $system_drawing_bitmap_str = { 53 79 73 74 65 6D 2E 44 72 61 77 69 6E 67 2E 42 69 74 6D 61 70 }
