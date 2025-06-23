@@ -1,6 +1,7 @@
 import "pe"
 import "time"
 import "math"
+import "dotnet"
 
 ///// pe header /////
 
@@ -72,12 +73,13 @@ rule pe_characteristics_dll_but_not_dll
         score = 50
 
     condition:
+        not dotnet.is_dotnet and
         pe.is_pe and
         pe.characteristics & pe.DLL and
         pe.number_of_exports == 0
-        and for any i in (0..pe.number_of_sections - 1): // revome common fp: dll with only resources
+        and for any section in pe.sections: // revome common fp: dll with only resources
             (
-                pe.sections[i].name == ".text" or pe.sections[i].name == ".code"
+                section.name == ".text" or section.name == ".code"
             )
 }
 
@@ -92,6 +94,7 @@ rule pe_number_of_sections_uncommon
         score = 50
 
     condition:
+        not dotnet.is_dotnet and
         pe.is_pe and
         not pe.is_dll() and
         (
@@ -101,7 +104,7 @@ rule pe_number_of_sections_uncommon
 }
 
 
-rule pe_purely_vrtl_executable_section
+rule pe_purely_virtual_executable_section
 {
     meta:
         description = "PE section is executable, purely vrtl (SizeOfRawData == 0)"
@@ -109,13 +112,13 @@ rule pe_purely_vrtl_executable_section
 
     condition:
         pe.is_pe and
-        for any i in (0..pe.number_of_sections - 1):
+        for any section in pe.sections:
             (
-                pe.sections[i].raw_data_size == 0 and
-                pe.sections[i].virtual_size > 0 and
+                section.raw_data_size == 0 and
+                section.virtual_size > 0 and
                 	(
-                		pe.sections[i].characteristics & pe.SECTION_CNT_CODE != 0 or
-                		pe.sections[i].characteristics & pe.SECTION_MEM_EXECUTE != 0
+                		section.characteristics & pe.SECTION_CNT_CODE != 0 or
+                		section.characteristics & pe.SECTION_MEM_EXECUTE != 0
                 	)
             )
 }
@@ -128,14 +131,14 @@ rule pe_purely_physical_section
 
     condition:
         pe.is_pe and
-        for any i in (0..pe.number_of_sections - 1):
+        for any section in pe.sections:
             (
-                pe.sections[i].raw_data_size > 0 and
-                pe.sections[i].virtual_size == 0
+                section.raw_data_size > 0 and
+                section.virtual_size == 0
             )
 }
 
-rule pe_unbalanced_vrtl_physical_rtio
+rule pe_unbalanced_virtual_physical_ratio
 {
     meta:
         description = "PE section with large difference between physical and vrtl size"
@@ -143,14 +146,13 @@ rule pe_unbalanced_vrtl_physical_rtio
 
     condition:
     	pe.is_pe and
-        for any i in (0..pe.number_of_sections - 1):
+        for any section in pe.sections:
             (
-                pe.sections[i].raw_data_size > 0 and
-                pe.sections[i].virtual_size > 0 and
+                section.raw_data_size > 0 and
+                section.virtual_size > 0 and
                 (
-                    (pe.sections[i].virtual_size > pe.sections[i].raw_data_size + 0x10000 or
-                    pe.sections[i].raw_data_size > pe.sections[i].virtual_size + 0x10000) and
-                    (pe.sections[i].name != ".data" and pe.sections[i].name != ".idata" and pe.sections[i].name != ".pdata" and pe.sections[i].name != ".rdata") //fps
+                    section.virtual_size > section.raw_data_size + 0x10000 or
+                    section.raw_data_size > section.virtual_size + 0x10000
                 )
             )
 }
@@ -162,10 +164,10 @@ rule pe_section_wx
 
     condition:
         pe.is_pe and
-        for any i in (0..pe.number_of_sections - 1):
+        for any section in pe.sections:
             (
-                pe.sections[i].characteristics & pe.SECTION_MEM_EXECUTE != 0 and
-                pe.sections[i].characteristics & pe.SECTION_MEM_WRITE != 0
+                section.characteristics & pe.SECTION_MEM_EXECUTE != 0 and
+                section.characteristics & pe.SECTION_MEM_WRITE != 0
             )
 }
 
@@ -177,11 +179,11 @@ rule pe_section_rwx
 
     condition:
         pe.is_pe and
-        for any i in (0..pe.number_of_sections - 1):
+        for any section in pe.sections:
             (
-                pe.sections[i].characteristics & pe.SECTION_MEM_READ != 0 and
-                pe.sections[i].characteristics & pe.SECTION_MEM_EXECUTE != 0 and
-                pe.sections[i].characteristics & pe.SECTION_MEM_WRITE != 0
+                section.characteristics & pe.SECTION_MEM_READ != 0 and
+                section.characteristics & pe.SECTION_MEM_EXECUTE != 0 and
+                section.characteristics & pe.SECTION_MEM_WRITE != 0
             )
 }
 
@@ -192,9 +194,9 @@ rule pe_section_no_name
 
     condition:
         pe.is_pe and
-        for any i in (0..pe.number_of_sections - 1):
+        for any section in pe.sections:
         	(
-            	pe.sections[i].name == ""
+            	section.name == ""
             )
 }
 
@@ -206,10 +208,10 @@ rule pe_executable_section_and_no_code
 
     condition:
         pe.is_pe and
-        for any i in (0..pe.number_of_sections - 1):
+        for any section in pe.sections:
             (
-                pe.sections[i].characteristics & pe.SECTION_MEM_EXECUTE != 0 and
-                pe.sections[i].characteristics & pe.SECTION_CNT_CODE == 0
+                section.characteristics & pe.SECTION_MEM_EXECUTE != 0 and
+                section.characteristics & pe.SECTION_CNT_CODE == 0
             )
 }
 
@@ -221,14 +223,14 @@ rule pe_code_section_and_no_executable
 
     condition:
         pe.is_pe and
-        for any i in (0..pe.number_of_sections - 1):
+        for any section in pe.sections:
             (
-                pe.sections[i].characteristics & pe.SECTION_CNT_CODE != 0 and
-                pe.sections[i].characteristics & pe.SECTION_MEM_EXECUTE == 0
+                section.characteristics & pe.SECTION_CNT_CODE != 0 and
+                section.characteristics & pe.SECTION_MEM_EXECUTE == 0
             )
 }
 
-rule pe_high_ntrpy_section
+rule pe_high_entropy_section
 {
     meta:
         description = "PE file with section ntrpy higher than 7"
@@ -236,9 +238,9 @@ rule pe_high_ntrpy_section
 
     condition:
         pe.is_pe and
-        for any i in (0..pe.number_of_sections - 1):
+        for any section in pe.sections:
         	(
-            	math.entropy(pe.sections[i].raw_data_offset, pe.sections[i].raw_data_size) >= 7
+            	math.entropy(section.raw_data_offset, section.raw_data_size) >= 7
             )
 }
 
@@ -299,6 +301,7 @@ rule pe_no_import_table
         description = "PE Import Table is missing"
 
     condition:
+        not dotnet.is_dotnet and
         pe.is_pe and
         not pe.is_dll() and
         (
@@ -315,40 +318,43 @@ rule pe_zero_imports
         description = "PE does not imports functions"
 
     condition:
+        not dotnet.is_dotnet and
         pe.is_pe and
         not pe.is_dll() and
-        pe.number_of_imports == 0
+        pe.number_of_imported_functions == 0
 }
 
-// number_of_imported_functions not supported
-//rule pe_very_low_imports
-//{
-//    meta:
-//        description = "PE imports few functions"
-//
-//    condition:
-//        pe.is_pe and
-//        not pe.is_dll() and
-//        pe.number_of_imported_functions <= 5
-//}
+
+rule pe_very_low_imports
+{
+    meta:
+        description = "PE imports few functions"
+
+    condition:
+        not dotnet.is_dotnet and
+        pe.is_pe and
+        not pe.is_dll() and
+        pe.number_of_imported_functions <= 5
+}
 
 
-// rule pe_imports_by_ordinal
-// {
-//     meta:
-//         description = "Detect PE imports using function ordinals (no named imports)"
+rule pe_imports_by_ordinal
+{
+    meta:
+        description = "Detect PE imports using function ordinals (no named imports)"
 
-//     condition:
-//         pe.is_pe and
-//         for any i in (0 .. pe.number_of_imports - 1) :
-//         	(
-//         		for any function in pe.import_details[i].functions :
-//         			(
-//         				function.name == "" and
-//         				function.ordinal != 0
-//         			)
-//         	)
-// }
+    condition:
+        pe.is_pe and
+        for any i in (0 .. pe.number_of_imports - 1) :
+        	(
+        		for any function in pe.import_details[i].functions :
+        			(
+        				function.name == "" and
+        				function.ordinal != 0
+        			)
+        	)
+}
+
 
 rule pe_gui_and_no_window_apis
 {
@@ -356,6 +362,7 @@ rule pe_gui_and_no_window_apis
         description = "PE with SUBSYSTEM_WINDOWS_GUI but no related imports"
 
     condition:
+        not dotnet.is_dotnet and
         pe.is_pe and
         not pe.is_dll() and // fp
         pe.subsystem == pe.SUBSYSTEM_WINDOWS_GUI and
@@ -365,18 +372,17 @@ rule pe_gui_and_no_window_apis
         )
 }
 
-// number_of_imported_functions not supported
-//rule pe_dynamic_api_resolution_imports
-//{
-//    meta:
-//        description = "PE imports few functions, including LoadLibrary and GetProcAddress"
-//        score = 50
-//
-//    condition:
-//        pe.is_pe and
-//        pe.number_of_imported_functions <= 5 and
-//        pe.imports(/kernel32.dll/i, /loadlibrary(a|w)|getprocaddress/i) == 2
-//}
+
+rule pe_dynamic_api_resolution_imports
+{
+    meta:
+        description = "PE imports few functions, including LoadLibrary and GetProcAddress"
+
+    condition:
+        pe.is_pe and
+        pe.number_of_imported_functions <= 5 and
+        pe.imports(/kernel32.dll/i, /loadlibrary(a|w)|getprocaddress/i) == 2
+}
 
 
 rule pe_dynamic_download_imports
@@ -458,9 +464,9 @@ rule pe_signature_expired
         description = "PE signature has expired"
     condition:
         pe.is_pe and
-        for any i in (0..pe.number_of_signatures - 1):
+        for any signature in pe.signatures:
         	(
-            	pe.signatures[i].not_after < time.now()
+            	signature.not_after < time.now()
             )
 }
 
@@ -470,10 +476,10 @@ rule pe_signature_expires_soon
         description = "PE signature expires soon"
     condition:
         pe.is_pe and
-        for any i in (0..pe.number_of_signatures - 1):
+        for any signature in pe.signatures:
         	(
-            	not pe.signatures[i].not_after < time.now() and // covered with pe_signature_expired
-                pe.signatures[i].not_after < time.now() + 86400 * 15  // 15 days
+            	not signature.not_after < time.now() and // covered with pe_signature_expired
+                signature.not_after < time.now() + 86400 * 15  // 15 days
             )
 }
 
@@ -481,7 +487,7 @@ rule pe_signature_expires_soon
 ///// resources, overlay, and embedded files /////
 
 
-rule pe_high_ntrpy_resource_no_image
+rule pe_high_entropy_resource_no_image
 {
     meta:
         description = "PE with embedded resource with high ntrpy (rcdata)"
@@ -490,11 +496,11 @@ rule pe_high_ntrpy_resource_no_image
     condition:
         pe.is_pe and
         pe.number_of_resources > 0 and
-        for any i in (0..pe.number_of_resources - 1):
+        for any resource in pe.resources:
         	(
-                pe.resources[i].length > 1024 and
-                pe.resources[i].type == pe.RESOURCE_TYPE_RCDATA and
-                math.entropy(pe.resources[i].offset, pe.resources[i].length) >= 7
+                resource.length > 1024 and
+                resource.type == pe.RESOURCE_TYPE_RCDATA and
+                math.entropy(resource.offset, resource.length) >= 7
         	)
 }
 
@@ -546,8 +552,8 @@ rule pe_embedded_x509_cert
 
   strings:
     $cert = "BEGIN CERTIFICATE" nocase ascii wide
-    $cert_xor = "BEGIN CERTIFICATE" xor
-    $cert_base64 = "QkVHSU4gQ0VSVElGSUNBVEU=" ascii wide
+    $cert_xor = "BEGIN CERTIFICATE" xor(0x01-0xff)
+    $cert_base64 = "BEGIN CERTIFICATE" base64 base64wide
     $cert_flipflop = "EBIG NECTRFICITAE" nocase ascii wide
     $cert_reverse = "ETACIFITREC NIGEB" nocase ascii wide
     $cert_hex = "424547494e204345525449464943415445" nocase ascii wide
@@ -565,9 +571,9 @@ rule pe_resource_reversed_pe
 
   condition:
   	pe.is_pe and
-    for any i in (0..pe.number_of_resources - 1):
+    for any resource in pe.resources:
     (
-        uint16be((pe.resources[i].offset + pe.resources[i].length) - 2 ) == 0x5a4d
+        uint16be((resource.offset + resource.length) - 2 ) == 0x5a4d
     )
 }
 
@@ -591,9 +597,9 @@ rule pe_resource_base64d_pe
 
   condition:
   	pe.is_pe and
-    for any i in (0..pe.number_of_resources - 1): (
-      uint32be(pe.resources[i].offset) == 0x54567151 and // TVqQAAMA
-      uint32be(pe.resources[i].offset + 4) == 0x41414D41 // AAAEAAAA
+    for any resource in pe.resources: (
+      uint32be(resource.offset) == 0x54567151 and // TVqQAAMA
+      uint32be(resource.offset + 4) == 0x41414D41 // AAAEAAAA
     )
 }
 
@@ -617,14 +623,13 @@ rule pe_resource_single_byte_xor_PE
 {
   meta:
     description = "Try the 3rd byte as a XOR key, since typically that byte is zero in a PE, meaning in encoded form it will contain the XOR key"
-    score = 75
 
   condition:
   	pe.is_pe and
-    for any i in (0..pe.number_of_resources - 1): (
-    	uint16(pe.resources[i].offset) != 0x5a4d and
-	    uint8(pe.resources[i].offset) ^ uint8(pe.resources[i].offset + 3) == 0x4d and
-	    uint8(pe.resources[i].offset+1) ^ uint8(pe.resources[i].offset + 3) == 0x5a
+    for any resource in pe.resources: (
+    	uint16(resource.offset) != 0x5a4d and
+	    uint8(resource.offset) ^ uint8(resource.offset + 3) == 0x4d and
+	    uint8(resource.offset+1) ^ uint8(resource.offset + 3) == 0x5a
     )
 }
 
@@ -663,11 +668,10 @@ rule pe_xored_dos_message
         score = 50
 
     strings:
-        $xored_dos_message = "This program cannot be run in DOS mode" xor
-        $clear_dos_message = "This program cannot be run in DOS mode" // avoid xor(0)
+        $dos_message = "This program cannot be run in DOS mode" xor(0x01-0xff) ascii wide
 
     condition:
-        $xored_dos_message and not $clear_dos_message
+        any of them
 }
 
 
