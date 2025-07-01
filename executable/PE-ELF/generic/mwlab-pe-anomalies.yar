@@ -104,7 +104,7 @@ rule pe_number_of_sections_uncommon
 }
 
 
-rule pe_purely_virtual_executable_section
+rule pe_purely_vrtl_executable_section
 {
     meta:
         description = "PE section is executable, purely vrtl (SizeOfRawData == 0)"
@@ -138,7 +138,7 @@ rule pe_purely_physical_section
             )
 }
 
-rule pe_unbalanced_virtual_physical_ratio
+rule pe_unbalanced_vrtl_physical_ratio
 {
     meta:
         description = "PE section with large difference between physical and vrtl size"
@@ -230,7 +230,7 @@ rule pe_code_section_and_no_executable
             )
 }
 
-rule pe_high_entropy_section
+rule pe_high_ntrpy_section
 {
     meta:
         description = "PE file with section ntrpy higher than 7"
@@ -487,7 +487,7 @@ rule pe_signature_expires_soon
 ///// resources, overlay, and embedded files /////
 
 
-rule pe_high_entropy_resource_no_image
+rule pe_high_ntrpy_resource_no_image
 {
     meta:
         description = "PE with embedded resource with high ntrpy (rcdata)"
