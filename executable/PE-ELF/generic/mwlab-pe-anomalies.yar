@@ -508,6 +508,7 @@ rule pe_large_overlay
 {
     meta:
         description = "PE with a large overlay"
+        score = 50
 
     condition:
         pe.is_pe and
