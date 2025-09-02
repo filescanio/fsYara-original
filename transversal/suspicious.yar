@@ -274,3 +274,23 @@ rule MiningPool
 	condition:
 		$stratum
 }
+
+rule xored_fingerprint_cmds
+{
+	meta:
+		description = "Detects xored fingerprinting commands"
+		author = "OPSWAT"
+		score = 70
+
+	strings:
+		$cmd1 = "whoami" xor(0x01-0xff)
+		$cmd2 = "tasklist" xor(0x01-0xff)
+		$cmd3 = "docker" xor(0x01-0xff)
+		$cmd_net = "net" xor(0x01-0xff) // "net user" 1st part 
+		$cmd_user = "user" xor(0x01-0xff) // "net user" 2nd part 
+		$cmd_dir = "dir" xor(0x01-0xff)
+		$cmd_cmd = "cmd" xor(0x01-0xff)
+
+	condition:
+		7 of ( $cmd* )
+}
