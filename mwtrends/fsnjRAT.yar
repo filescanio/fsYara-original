@@ -288,7 +288,8 @@ rule Njrat_1
 			4 of ($x*))
 }
 
-rule njrat : rat
+//modified because overlaping with xworm (interesting that both use same c2 separator)
+rule njrat : rat refined
 {
 	meta:
 		rule_group = "implant"
@@ -325,9 +326,16 @@ rule njrat : rat
 		$rights_0 = "netsh firewall add allowedprogram \"" wide
 		$rights_1 = "netsh firewall delete allowedprogram \"" wide
 
+		$overlap0 = "StartDDos"
+		$overlap1 = "StopDDos"
+		$overlap2 = "XWorm"
+		$overlap3 = "Xchat"
+		$overlap4 = "XLogger"
+
 	condition:
 		( all of ($cnc_traffic_*)) and 
-		( all of ($rights_*))
+		( all of ($rights_*)) and
+		not ( any of ($overlap*) )
 }
 
 rule Windows_Trojan_Njrat_30f3c220_1
