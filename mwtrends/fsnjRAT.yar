@@ -339,8 +339,6 @@ rule njrat : rat
 		not ( any of ($overlap*) )
 }
 
-
-
 rule Windows_Trojan_Njrat_30f3c220_1
 {
 	meta:
