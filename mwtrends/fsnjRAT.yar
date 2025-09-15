@@ -289,7 +289,7 @@ rule Njrat_1
 }
 
 //modified because overlaping with xworm (interesting that both use same c2 separator)
-rule njrat : rat
+rule njrat : rat refined
 {
 	meta:
 		rule_group = "implant"
@@ -328,10 +328,9 @@ rule njrat : rat
 
 		$overlap0 = "StartDDos"
 		$overlap1 = "StopDDos"
-		$overlap2 = "Xchat"
-		$overlap3 = "XLogger"
-		$overlap3 = "XWorm"
-
+		$overlap2 = "XWorm"
+		$overlap3 = "Xchat"
+		$overlap4 = "XLogger"
 
 	condition:
 		( all of ($cnc_traffic_*)) and 
