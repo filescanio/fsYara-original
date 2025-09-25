@@ -20,5 +20,5 @@ rule Cerberus : RAT memory
 		$generic = "cerberus" nocase
 
 	condition:
-		any of them
+		2 of them
 }
