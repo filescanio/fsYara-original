@@ -431,46 +431,46 @@ rule Windows_Trojan_AgentTesla_ebf431a8
 		4 of them
 }
 
-rule Win32_Trojan_AgentTesla
-{
-	meta:
-		description = "Identifies AgentTesla samples."
-		author = "Netskope Threat Labs"
-		ruleset = "Win32_Trojan_AgentTesla.yar"
-		repository = "netskopeoss/NetskopeThreatLabsIOCs"
-		source_url = "https://github.com/netskopeoss/NetskopeThreatLabsIOCs/blob/52c780db6106d0c0e8deb04653e036cdd4408e56/Malware/AgentTesla/Yara/Win32_Trojan_AgentTesla.yar"
-		license = "MIT License"
-		score = 75
-
-	strings:
-		$bin00 = "#Blob"
-		$bin01 = "#GUID"
-		$bin02 = "#Strings"
-		$str00 = "get_AccountCredential"
-		$str01 = "get_accountName"
-		$str02 = "get_Address"
-		$str03 = "get_AltKeyDown"
-		$str04 = "get_Assembly"
-		$str05 = "get_Attachments"
-		$str06 = "get_Clipboard"
-		$str07 = "get_Computer"
-		$str08 = "get_ComputerName"
-		$str09 = "get_Connected"
-		$str10 = "get_ExecutablePath"
-		$str11 = "get_Host"
-		$str12 = "get_Key"
-		$str13 = "get_Keyboard"
-		$str14 = "get_ProcessName"
-		$str15 = "set_UserAgent"
-		$str16 = "set_UserName"
-		$str17 = "set_IsBodyHtml"
-		$str18 = "set_IV"
-
-	condition:
-		uint16(0)==0x5a4d and 
-		all of ($bin*) and 
-		10 of ($str*)
-}
+//rule Win32_Trojan_AgentTesla
+//{
+//	meta:
+//		description = "Identifies AgentTesla samples."
+//		author = "Netskope Threat Labs"
+//		ruleset = "Win32_Trojan_AgentTesla.yar"
+//		repository = "netskopeoss/NetskopeThreatLabsIOCs"
+//		source_url = "https://github.com/netskopeoss/NetskopeThreatLabsIOCs/blob/52c780db6106d0c0e8deb04653e036cdd4408e56/Malware/AgentTesla/Yara/Win32_Trojan_AgentTesla.yar"
+//		license = "MIT License"
+//		score = 75
+//
+//	strings:
+//		$bin00 = "#Blob"
+//		$bin01 = "#GUID"
+//		$bin02 = "#Strings"
+//		$str00 = "get_AccountCredential"
+//		$str01 = "get_accountName"
+//		$str02 = "get_Address"
+//		$str03 = "get_AltKeyDown"
+//		$str04 = "get_Assembly"
+//		$str05 = "get_Attachments"
+//		$str06 = "get_Clipboard"
+//		$str07 = "get_Computer"
+//		$str08 = "get_ComputerName"
+//		$str09 = "get_Connected"
+//		$str10 = "get_ExecutablePath"
+//		$str11 = "get_Host"
+//		$str12 = "get_Key"
+//		$str13 = "get_Keyboard"
+//		$str14 = "get_ProcessName"
+//		$str15 = "set_UserAgent"
+//		$str16 = "set_UserName"
+//		$str17 = "set_IsBodyHtml"
+//		$str18 = "set_IV"
+//
+//	condition:
+//		uint16(0)==0x5a4d and 
+//		all of ($bin*) and 
+//		10 of ($str*)
+//}
 
 rule agenttesla_smtp_variant
 {
@@ -686,7 +686,6 @@ rule fsAgentTesla
 		Windows_Trojan_AgentTesla_f2a90d14 or 
 		Windows_Trojan_AgentTesla_a2d69e48 or 
 		Windows_Trojan_AgentTesla_ebf431a8 or 
-		Win32_Trojan_AgentTesla or 
 		agenttesla_smtp_variant or 
 		AgentTeslaV3_1 or 
 		Agenttesla_type1 or 
