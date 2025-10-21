@@ -5074,6 +5074,7 @@ rule WEBSHELL_CSHARP_Generic
         ( $input_http or all of ( $input_form* ) ) and all of ( $exec_proc* ) and any of ( $exec_shell* )
 }
 
+import "pe"
 rule WEBSHELL_ASP_Runtime_Compile : FILE {
     meta:
         description = "ASP webshell compiling payload in memory at runtime, e.g. sharpyshell"
@@ -5139,6 +5140,7 @@ rule WEBSHELL_ASP_Runtime_Compile : FILE {
 
     condition:
         //any of them or
+        not pe.is_pe and
         (
             (
                 filesize < 50KB and
