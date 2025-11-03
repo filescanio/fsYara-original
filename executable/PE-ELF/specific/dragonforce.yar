@@ -6,7 +6,7 @@ rule DragonForce
         description = "Yara Rule for DragonForce Ransomware"
         md5 = "05f13a9c902297debecb4c94c6674c"
         score = 75
-        tag = ["dragonforce"]
+        tag = "dragonforce"
 
     strings:
         $mz = { 4D 5A }
