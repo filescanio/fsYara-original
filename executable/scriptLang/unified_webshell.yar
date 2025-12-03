@@ -1357,7 +1357,7 @@ rule WEBSHELL_PHP_Generic
         $cpayload21 = /\bReflectionFunction[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
         $cpayload22 = /fetchall\(PDO::FETCH_FUNC[\n\t ]*[,}\)]/ nocase wide ascii
         $cpayload23 = /\bReflectionClass[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
-        
+
         $m_cpayload_preg_filter1 = /\bpreg_filter[\n\t ]*(\([^\)]|\/\*)/ nocase wide ascii
         $m_cpayload_preg_filter2 = "'|.*|e'" nocase wide ascii
         // TODO backticks
@@ -1531,53 +1531,57 @@ rule WEBSHELL_PHP_Generic
         all of ( $m_cpayload_preg_filter* )
         )
         and
-        ( ( filesize < 1000 and not any of ( $wfp_tiny* ) ) or
-        ( (
-        $gif at 0 or
         (
-            filesize < 4KB and
+            ( filesize < 1000 and not any of ( $wfp_tiny* ) )
+            or
             (
-                1 of ( $gen_much_sus* ) or
-                2 of ( $gen_bit_sus* )
-            )
-        ) or (
-            filesize < 20KB and
-            (
-                2 of ( $gen_much_sus* ) or
-                3 of ( $gen_bit_sus* )
-            )
-        ) or (
-            filesize < 50KB and
-            (
-                2 of ( $gen_much_sus* ) or
-                4 of ( $gen_bit_sus* )
-            )
-        ) or (
-            filesize < 100KB and
-            (
-                2 of ( $gen_much_sus* ) or
-                6 of ( $gen_bit_sus* )
-            )
-        ) or (
-            filesize < 150KB and
-            (
-                3 of ( $gen_much_sus* ) or
-                7 of ( $gen_bit_sus* )
-            )
-        ) or (
-            filesize < 500KB and
-            (
-                4 of ( $gen_much_sus* ) or
-                8 of ( $gen_bit_sus* )
-            )
+                (
+                    $gif at 0 or
+                    (
+                        filesize < 4KB and
+                        (
+                            1 of ( $gen_much_sus* ) or
+                            2 of ( $gen_bit_sus* )
+                        )
+                    ) or (
+                        filesize < 20KB and
+                        (
+                            2 of ( $gen_much_sus* ) or
+                            3 of ( $gen_bit_sus* )
+                        )
+                    ) or (
+                        filesize < 50KB and
+                        (
+                            2 of ( $gen_much_sus* ) or
+                            4 of ( $gen_bit_sus* )
+                        )
+                    ) or (
+                        filesize < 100KB and
+                        (
+                            2 of ( $gen_much_sus* ) or
+                            6 of ( $gen_bit_sus* )
+                        )
+                    ) or (
+                        filesize < 150KB and
+                        (
+                            3 of ( $gen_much_sus* ) or
+                            7 of ( $gen_bit_sus* )
+                        )
+                    ) or (
+                        filesize < 500KB and
+                        (
+                            4 of ( $gen_much_sus* ) or
+                            8 of ( $gen_bit_sus* )
+                        )
+                    )
+                )
+                and
+                ( filesize > 5KB or not any of ( $wfp_tiny* ))
+            ) or
+                ( filesize < 500KB and (4 of ( $cmpayload* ))
+            ) or 
+                ( filesize < 5000KB and (8 of ( $cmpayload* )))
         )
-        )
-        and
-        ( filesize > 5KB or not any of ( $wfp_tiny* ) ) ) or
-        ( filesize < 500KB and (
-            4 of ( $cmpayload* )
-        )
-        ) )
 }
 
 rule WEBSHELL_PHP_Generic_Callback
