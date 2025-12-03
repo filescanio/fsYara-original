@@ -8328,6 +8328,105 @@ rule webshell_case_anomly {
         )
 }
 
+rule WEBSHELL_PHP_HEX_ENCODE
+{
+    meta:
+        description = "PHP webshell contains encoded function names"
+        score = 75
+        author = "Arnim Rupp modified by OPSWAT"
+        hash = "274fa74438e744681dc54bab192d7f71177d82bb75bbdba440bc50ce161cdcbf"
+        hash = "b173125982ecde8e3b0faad8c381ed5cbb46a606afa505de64dbfa6a0c46a93c"
+        hash = "ad9eefdc9c9109fe6d80aaa5e8f5232aead3ac9dc67a9578ed70c6426956a438"
+    strings:
+        
+        $hex_gen1 = "7068705F756E616D65" nocase wide ascii // php_uname
+        $hex_gen2 = "73657373696F6E5F7374617274" nocase wide ascii // session_start
+        $hex_gen3 = "6572726F725F7265706F7274696E67" nocase wide ascii // error_reporting
+        $hex_gen4 = "70687076657273696F6E" nocase wide ascii // phpversion
+        $hex_gen5 = "6D696D655F636F6E74656E745F74797065" nocase wide ascii // mime_content_type
+        $hex_gen6 = "737072696E7466" nocase wide ascii // sprintf
+        $hex_gen7 = "666C617368" nocase wide ascii // flash
+        $hex_gen8 = "74727565" nocase wide ascii // true
+        $hex_gen9 = "64617465" nocase wide ascii // date
+        $hex_gen10 = "676574686F737462796E616D65" nocase wide ascii // gethostbyname
+        $hex_file1 = "66696C655F7075745F636F6E74656E7473" nocase wide ascii // file_put_contents
+        $hex_file2 = "66696C655F6765745F636F6E74656E7473" nocase wide ascii // file_get_contents
+        $hex_file3 = "66696C657065726D73" nocase wide ascii // fileperms
+        $hex_file4 = "66696C656D74696D65" nocase wide ascii // filemtime
+        $hex_file5 = "66696C6574797065" nocase wide ascii // filetype
+        $hex_file6 = "6D6F76655F75706C6F616465645F66696C65" nocase wide ascii // move_uploaded_file
+        $hex_file7 = "72656E616D65" nocase wide ascii // rename
+        $hex_file8 = "7363616E646972" nocase wide ascii // scandir
+        $hex_file9 = "6368646972" nocase wide ascii // chdir
+        $hex_file10 = "676574637764" nocase wide ascii // getcwd
+        $hex_file11 = "6469726E616D65" nocase wide ascii // dirname
+        $hex_file12 = "6673697A65" nocase wide ascii // fsize
+        $hex_file13 = "6D6B646972" nocase wide ascii // mkdir
+        $hex_file14 = "726D646972" nocase wide ascii // rmdir
+        $hex_file15 = "756E6C696E6B" nocase wide ascii // unlink
+        $hex_exec1 = "7368656C6C5F65786563" nocase wide ascii // shell_exec
+        $hex_exec2 = "66756E6374696F6E5F657869737473" nocase wide ascii // function_exists
+        $hex_exec3 = "6576616C" nocase wide ascii // eval
+        $hex_exec4 = "65786563" nocase wide ascii // exec
+        $hex_exec5 = "73797374656D" nocase wide ascii // system
+        $hex_string1 = "737562737472" nocase wide ascii // substr
+        $hex_string2 = "7374725F7265706C616365" nocase wide ascii // str_replace
+        $hex_string3 = "68746D6C7370656369616C6368617273" nocase wide ascii // htmlspecialchars
+        $hex_string4 = "6578706C6F6465" nocase wide ascii // explode
+        
+        //strings from private rule php_false_positive
+        // try to use only strings which would be flagged by themselves as suspicious by other rules, e.g. eval
+        // a good choice is a string with good atom quality = ideally 4 unusual characters next to each other
+        $gfp1  = "eval(\"return [$serialised_parameter" // elgg
+        $gfp2  = "$this->assert(strpos($styles, $"
+        $gfp3  = "$module = new $_GET['module']($_GET['scope']);"
+        $gfp4  = "$plugin->$_POST['action']($_POST['id']);"
+        $gfp5  = "$_POST[partition_by]($_POST["
+        $gfp6  = "$object = new $_REQUEST['type']($_REQUEST['id']);"
+        $gfp7  = "The above example code can be easily exploited by passing in a string such as" // ... ;)
+        $gfp8  = "Smarty_Internal_Debug::start_render($_template);"
+        $gfp9  = "?p4yl04d=UNION%20SELECT%20'<?%20system($_GET['command']);%20?>',2,3%20INTO%20OUTFILE%20'/var/www/w3bsh3ll.php"
+        $gfp10 = "[][}{;|]\\|\\\\[+=]\\|<?=>?"
+        $gfp11 = "(eval (getenv \"EPROLOG\")))"
+        $gfp12 = "ZmlsZV9nZXRfY29udGVudHMoJ2h0dHA6Ly9saWNlbnNlLm9wZW5jYXJ0LWFwaS5jb20vbGljZW5zZS5waHA/b3JkZXJ"
+
+        //strings from private rule capa_php_old_safe
+        $php_short = "<?" wide ascii
+        // prevent xml and asp from hitting with the short tag
+        $no_xml1 = "<?xml version" nocase wide ascii
+        $no_xml2 = "<?xml-stylesheet" nocase wide ascii
+        $no_asp1 = "<%@LANGUAGE" nocase wide ascii
+        $no_asp2 = /<script language="(vb|jscript|c#)/ nocase wide ascii
+        $no_pdf = "<?xpacket"
+
+        // of course the new tags should also match
+        // already matched by "<?"
+        $php_new1 = /<\?=[^?]/ wide ascii
+        $php_new2 = "<?php" nocase wide ascii
+        $php_new3 = "<script language=\"php" nocase wide ascii
+
+    condition:
+        not (
+            any of ( $gfp* )
+        )
+        and (
+            (
+                (
+                        $php_short in (0..100) or
+                        $php_short in (filesize-1000..filesize)
+                )
+                and not any of ( $no_* )
+            )
+            or any of ( $php_new* )
+        )
+        and (
+            3 of ($hex_gen1, $hex_gen2, $hex_gen3, $hex_gen4, $hex_gen5, $hex_gen6, $hex_gen7, $hex_gen8, $hex_gen9, $hex_gen10) and
+            ( 4 of ($hex_file1, $hex_file2, $hex_file3, $hex_file4, $hex_file5, $hex_file6, $hex_file7, $hex_file8, $hex_file9, $hex_file10, $hex_file11, $hex_file12, $hex_file13, $hex_file14, $hex_file15) or
+            any of ($hex_exec1, $hex_exec2, $hex_exec3, $hex_exec4, $hex_exec5) or
+            any of ($hex_string1, $hex_string2, $hex_string3, $hex_string4) )
+        )
+}
+
 // ===== Source: fsYara-original/executable/scriptLang/WShell_THOR_Webshells.yar =====
 
 /*
