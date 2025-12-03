@@ -1337,6 +1337,7 @@ rule WEBSHELL_PHP_Generic
         $inp18 = "array_values($_SERVER)" wide ascii
         $inp19 = /file_get_contents\("https?:\/\// wide ascii
         $inp20 = "TSOP_" wide ascii
+        $inp21 = /file_get_contents\(\$/ wide ascii
 
         //strings from private rule capa_php_payload
         // \([^)] to avoid matching on e.g. eval() in comments
