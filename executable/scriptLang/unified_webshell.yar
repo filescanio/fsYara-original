@@ -1356,7 +1356,8 @@ rule WEBSHELL_PHP_Generic
         $cpayload20 = /\bcreate_function[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
         $cpayload21 = /\bReflectionFunction[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
         $cpayload22 = /fetchall\(PDO::FETCH_FUNC[\n\t ]*[,}\)]/ nocase wide ascii
-
+        $cpayload23 = /\bReflectionClass[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        
         $m_cpayload_preg_filter1 = /\bpreg_filter[\n\t ]*(\([^\)]|\/\*)/ nocase wide ascii
         $m_cpayload_preg_filter2 = "'|.*|e'" nocase wide ascii
         // TODO backticks
