@@ -315,80 +315,80 @@ rule APT_MAL_CN_Wocao_info_vbs {
         4 of them
 }
 
-rule APT_MAL_CN_Wocao_webshell_console_jsp {
-    meta:
-        description = "Strings from the console.jsp webshell"
-        author = "Fox-IT SRT"
-        reference = "https://www.fox-it.com/en/news/whitepapers/operation-wocao-shining-a-light-on-one-of-chinas-hidden-hacking-groups/"
+// rule APT_MAL_CN_Wocao_webshell_console_jsp {
+//     meta:
+//         description = "Strings from the console.jsp webshell"
+//         author = "Fox-IT SRT"
+//         reference = "https://www.fox-it.com/en/news/whitepapers/operation-wocao-shining-a-light-on-one-of-chinas-hidden-hacking-groups/"
 
-        id = "1afdfc34-d2e3-58c7-80ea-ee5632e42469"
-    strings:
-        $a = "String strLogo = request.getParameter(\"image\")"
-        $b = "!strLogo.equals(\"web.gif\")"
-        $c = "<font color=red>Save Failed!</font>"
-        $d = "<font color=red>Save Success!</font>"
-        $e = "Save path:<br><input type=text"
-        $f = "if (newfile.exists() && newfile.length()>0) { out.println"
+//         id = "1afdfc34-d2e3-58c7-80ea-ee5632e42469"
+//     strings:
+//         $a = "String strLogo = request.getParameter(\"image\")"
+//         $b = "!strLogo.equals(\"web.gif\")"
+//         $c = "<font color=red>Save Failed!</font>"
+//         $d = "<font color=red>Save Success!</font>"
+//         $e = "Save path:<br><input type=text"
+//         $f = "if (newfile.exists() && newfile.length()>0) { out.println"
 
-    condition:
-        1 of them
-}
+//     condition:
+//         1 of them
+// }
 
-rule APT_MAL_CN_Wocao_webshell_index_jsp {
-    meta:
-        description = "Strings from the index.jsp socket tunnel"
-        author = "Fox-IT SRT"
-        reference = "https://www.fox-it.com/en/news/whitepapers/operation-wocao-shining-a-light-on-one-of-chinas-hidden-hacking-groups/"
+// rule APT_MAL_CN_Wocao_webshell_index_jsp {
+//     meta:
+//         description = "Strings from the index.jsp socket tunnel"
+//         author = "Fox-IT SRT"
+//         reference = "https://www.fox-it.com/en/news/whitepapers/operation-wocao-shining-a-light-on-one-of-chinas-hidden-hacking-groups/"
 
-        id = "9c226ccd-6c69-523c-bca4-371e55274667"
-    strings:
-        $x1 = "X-CMD"
-        $x2 = "X-STATUS"
-        $x3 = "X-TARGET"
-        $x4 = "X-ERROR"
-        $a = "out.print(\"All seems fine.\");"
+//         id = "9c226ccd-6c69-523c-bca4-371e55274667"
+//     strings:
+//         $x1 = "X-CMD"
+//         $x2 = "X-STATUS"
+//         $x3 = "X-TARGET"
+//         $x4 = "X-ERROR"
+//         $a = "out.print(\"All seems fine.\");"
 
-    condition:
-        all of ($x*) and $a
-}
+//     condition:
+//         all of ($x*) and $a
+// }
 
-rule APT_MAL_CN_Wocao_webshell_ver_jsp {
-    meta:
-        description = "Strings from the ver.jsp webshell"
-        author = "Fox-IT SRT"
-        reference = "https://www.fox-it.com/en/news/whitepapers/operation-wocao-shining-a-light-on-one-of-chinas-hidden-hacking-groups/"
+// rule APT_MAL_CN_Wocao_webshell_ver_jsp {
+//     meta:
+//         description = "Strings from the ver.jsp webshell"
+//         author = "Fox-IT SRT"
+//         reference = "https://www.fox-it.com/en/news/whitepapers/operation-wocao-shining-a-light-on-one-of-chinas-hidden-hacking-groups/"
 
-        id = "b2828b84-8934-5111-9345-683a07025070"
-    strings:
-        $a = "String strLogo = request.getParameter(\"id\")"
-        $b = "!strLogo.equals(\"256\")"
-        $c = "boolean chkos = msg.startsWith"
-        $d = "while((c = er.read()) != -1)"
-        $e = "out.print((char)c);}in.close()"
-        $f = "out.print((char)c);}er.close()"
+//         id = "b2828b84-8934-5111-9345-683a07025070"
+//     strings:
+//         $a = "String strLogo = request.getParameter(\"id\")"
+//         $b = "!strLogo.equals(\"256\")"
+//         $c = "boolean chkos = msg.startsWith"
+//         $d = "while((c = er.read()) != -1)"
+//         $e = "out.print((char)c);}in.close()"
+//         $f = "out.print((char)c);}er.close()"
 
-    condition:
-        1 of them
-}
+//     condition:
+//         1 of them
+// }
 
-rule APT_MAL_CN_Wocao_webshell_webinfo {
-    meta:
-        description = "Generic strings from webinfo.war webshells"
-        author = "Fox-IT SRT"
-        reference = "https://www.fox-it.com/en/news/whitepapers/operation-wocao-shining-a-light-on-one-of-chinas-hidden-hacking-groups/"
+// rule APT_MAL_CN_Wocao_webshell_webinfo {
+//     meta:
+//         description = "Generic strings from webinfo.war webshells"
+//         author = "Fox-IT SRT"
+//         reference = "https://www.fox-it.com/en/news/whitepapers/operation-wocao-shining-a-light-on-one-of-chinas-hidden-hacking-groups/"
 
-        id = "b8477f62-f3f6-5526-b0e3-9b794fefaa1f"
-    strings:
-        $var1 = "String strLogo = request.getParameter"
-        $var2 = "String content = request.getParameter(\"content\");"
-        $var3 = "String basePath=request.getScheme()"
-        $var4 = "!strLogo.equals("
-        $var5 = "if(path!=null && !path.equals(\"\") && content!=null"
-        $var6 = "File newfile=new File(path);"
+//         id = "b8477f62-f3f6-5526-b0e3-9b794fefaa1f"
+//     strings:
+//         $var1 = "String strLogo = request.getParameter"
+//         $var2 = "String content = request.getParameter(\"content\");"
+//         $var3 = "String basePath=request.getScheme()"
+//         $var4 = "!strLogo.equals("
+//         $var5 = "if(path!=null && !path.equals(\"\") && content!=null"
+//         $var6 = "File newfile=new File(path);"
 
-        $str1 = "Save Success!"
-        $str2 = "Save Failed!"
+//         $str1 = "Save Success!"
+//         $str2 = "Save Failed!"
 
-    condition:
-        2 of ($var*) or (all of ($str*) and 1 of ($var*))
-}
+//     condition:
+//         2 of ($var*) or (all of ($str*) and 1 of ($var*))
+// }

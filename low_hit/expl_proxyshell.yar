@@ -33,52 +33,52 @@ rule EXPL_Exchange_ProxyShell_Successful_Aug21_1 : SCRIPT {
       1 of them
 }
 
-rule WEBSHELL_ASPX_ProxyShell_Aug21_2 {
-   meta:
-      description = "Detects webshells dropped by ProxyShell exploitation based on their file header (must be PST), size and content"
-      author = "Florian Roth (Nextron Systems)"
-      reference = "https://www.bleepingcomputer.com/news/microsoft/microsoft-exchange-servers-are-getting-hacked-via-proxyshell-exploits/"
-      date = "2021-08-13"
-      id = "a351a466-695e-570e-8c7f-9c6c0534839c"
-   strings:
-      $s1 = "Page Language=" ascii nocase
-   condition:
-      uint32(0) == 0x4e444221 /* PST header: !BDN */
-      and filesize < 2MB
-      and $s1
-}
+// rule WEBSHELL_ASPX_ProxyShell_Aug21_2 {
+//    meta:
+//       description = "Detects webshells dropped by ProxyShell exploitation based on their file header (must be PST), size and content"
+//       author = "Florian Roth (Nextron Systems)"
+//       reference = "https://www.bleepingcomputer.com/news/microsoft/microsoft-exchange-servers-are-getting-hacked-via-proxyshell-exploits/"
+//       date = "2021-08-13"
+//       id = "a351a466-695e-570e-8c7f-9c6c0534839c"
+//    strings:
+//       $s1 = "Page Language=" ascii nocase
+//    condition:
+//       uint32(0) == 0x4e444221 /* PST header: !BDN */
+//       and filesize < 2MB
+//       and $s1
+// }
 
-rule WEBSHELL_ASPX_ProxyShell_Aug21_3 {
-   meta:
-      description = "Detects webshells dropped by ProxyShell exploitation based on their file header (must be DER), size and content"
-      author = "Max Altgelt"
-      reference = "https://twitter.com/gossithedog/status/1429175908905127938?s=12"
-      date = "2021-08-23"
-      score = 75
-      id = "a7bca62b-c8f1-5a38-81df-f3d4582a590b"
-   strings:
-      $s1 = "Page Language=" ascii nocase
-   condition:
-      uint16(0) == 0x8230 /* DER start */
-      and filesize < 10KB
-      and $s1
-}
+// rule WEBSHELL_ASPX_ProxyShell_Aug21_3 {
+//    meta:
+//       description = "Detects webshells dropped by ProxyShell exploitation based on their file header (must be DER), size and content"
+//       author = "Max Altgelt"
+//       reference = "https://twitter.com/gossithedog/status/1429175908905127938?s=12"
+//       date = "2021-08-23"
+//       score = 75
+//       id = "a7bca62b-c8f1-5a38-81df-f3d4582a590b"
+//    strings:
+//       $s1 = "Page Language=" ascii nocase
+//    condition:
+//       uint16(0) == 0x8230 /* DER start */
+//       and filesize < 10KB
+//       and $s1
+// }
 
-rule WEBSHELL_ASPX_ProxyShell_Sep21_1 { 
-   meta:
-      description = "Detects webshells dropped by ProxyShell exploitation based on their file header (must be PST) and base64 decoded request"
-      author = "Tobias Michalski"
-      date = "2021-09-17"
-      reference = "Internal Research"
-      hash = "219468c10d2b9d61a8ae70dc8b6d2824ca8fbe4e53bbd925eeca270fef0fd640"
-      score = 75
-      id = "d0d23e17-6b6a-51d1-afd9-59cc2404bcd8"
-   strings:
-      $s = ".FromBase64String(Request["
-   condition:
-      uint32(0) == 0x4e444221
-      and any of them
-}
+// rule WEBSHELL_ASPX_ProxyShell_Sep21_1 { 
+//    meta:
+//       description = "Detects webshells dropped by ProxyShell exploitation based on their file header (must be PST) and base64 decoded request"
+//       author = "Tobias Michalski"
+//       date = "2021-09-17"
+//       reference = "Internal Research"
+//       hash = "219468c10d2b9d61a8ae70dc8b6d2824ca8fbe4e53bbd925eeca270fef0fd640"
+//       score = 75
+//       id = "d0d23e17-6b6a-51d1-afd9-59cc2404bcd8"
+//    strings:
+//       $s = ".FromBase64String(Request["
+//    condition:
+//       uint32(0) == 0x4e444221
+//       and any of them
+// }
 
 rule APT_IIS_Config_ProxyShell_Artifacts {
    meta:
@@ -105,73 +105,73 @@ rule APT_IIS_Config_ProxyShell_Artifacts {
       filesize < 500KB and all of ($a*) and 1 of ($s*)
 }
 
-rule WEBSHELL_ASPX_ProxyShell_Exploitation_Aug21_1 {
-   meta:
-      description = "Detects unknown malicious loaders noticed in August 2021"
-      author = "Florian Roth (Nextron Systems)"
-      reference = "https://twitter.com/VirITeXplorer/status/1430206853733097473"
-      date = "2021-08-25"
-      score = 90
-      id = "1fa563fc-c91c-5f4e-98f1-b895e1acb4f4"
-   strings:
-      $x1 = ");eval/*asf" ascii
-   condition:
-      filesize < 600KB and 1 of them
-}
+// rule WEBSHELL_ASPX_ProxyShell_Exploitation_Aug21_1 {
+//    meta:
+//       description = "Detects unknown malicious loaders noticed in August 2021"
+//       author = "Florian Roth (Nextron Systems)"
+//       reference = "https://twitter.com/VirITeXplorer/status/1430206853733097473"
+//       date = "2021-08-25"
+//       score = 90
+//       id = "1fa563fc-c91c-5f4e-98f1-b895e1acb4f4"
+//    strings:
+//       $x1 = ");eval/*asf" ascii
+//    condition:
+//       filesize < 600KB and 1 of them
+// }
 
-rule WEBSHELL_ASPX_ProxyShell_Aug15 {
-   meta:
-      description = "Webshells iisstart.aspx and Logout.aspx"
-      author = "Moritz Oettle"
-      reference = "https://github.com/hvs-consulting/ioc_signatures/tree/main/Proxyshell"
-      date = "2021-09-04"
-      score = 75
-      id = "b1e6c0f3-787f-59b8-8123-4045522047ca"
-   strings:
-      $g1 = "language=\"JScript\"" ascii
-      $g2 = "function getErrorWord" ascii
-      $g3 = "errorWord" ascii
-      $g4 = "Response.Redirect" ascii
-      $g5 = "function Page_Load" ascii
-      $g6 = "runat=\"server\"" ascii
-      $g7 = "Request[" ascii
-      $g8 = "eval/*" ascii
+// rule WEBSHELL_ASPX_ProxyShell_Aug15 {
+//    meta:
+//       description = "Webshells iisstart.aspx and Logout.aspx"
+//       author = "Moritz Oettle"
+//       reference = "https://github.com/hvs-consulting/ioc_signatures/tree/main/Proxyshell"
+//       date = "2021-09-04"
+//       score = 75
+//       id = "b1e6c0f3-787f-59b8-8123-4045522047ca"
+//    strings:
+//       $g1 = "language=\"JScript\"" ascii
+//       $g2 = "function getErrorWord" ascii
+//       $g3 = "errorWord" ascii
+//       $g4 = "Response.Redirect" ascii
+//       $g5 = "function Page_Load" ascii
+//       $g6 = "runat=\"server\"" ascii
+//       $g7 = "Request[" ascii
+//       $g8 = "eval/*" ascii
 
-      $s1 = "AppcacheVer" ascii /* HTTP Request Parameter */
-      $s2 = "clientCode" ascii /* HTTP Request Parameter */
-      $s3 = "LaTkWfI64XeDAXZS6pU1KrsvLAcGH7AZOQXjrFkT816RnFYJQR" ascii
-   condition:
-      filesize < 1KB and
-      ( 1 of ($s*) or 4 of ($g*) )
-}
+//       $s1 = "AppcacheVer" ascii /* HTTP Request Parameter */
+//       $s2 = "clientCode" ascii /* HTTP Request Parameter */
+//       $s3 = "LaTkWfI64XeDAXZS6pU1KrsvLAcGH7AZOQXjrFkT816RnFYJQR" ascii
+//    condition:
+//       filesize < 1KB and
+//       ( 1 of ($s*) or 4 of ($g*) )
+// }
 
-rule WEBSHELL_Mailbox_Export_PST_ProxyShell_Aug26 {
-   meta:
-      description = "Webshells generated by an Mailbox export to PST and stored as aspx: 570221043.aspx 689193944.aspx luifdecggoqmansn.aspx"
-      author = "Moritz Oettle"
-      reference = "https://github.com/hvs-consulting/ioc_signatures/tree/main/Proxyshell"
-      date = "2021-09-04"
-      score = 85
-      id = "6aea414f-d27c-5202-84f8-b8620782fc90"
-   strings:
-      $x1 = "!BDN" /* PST file header */
+// rule WEBSHELL_Mailbox_Export_PST_ProxyShell_Aug26 {
+//    meta:
+//       description = "Webshells generated by an Mailbox export to PST and stored as aspx: 570221043.aspx 689193944.aspx luifdecggoqmansn.aspx"
+//       author = "Moritz Oettle"
+//       reference = "https://github.com/hvs-consulting/ioc_signatures/tree/main/Proxyshell"
+//       date = "2021-09-04"
+//       score = 85
+//       id = "6aea414f-d27c-5202-84f8-b8620782fc90"
+//    strings:
+//       $x1 = "!BDN" /* PST file header */
 
-      $g1 = "Page language=" ascii
-      $g2 = "<%@ Page" ascii
-      $g3 = "Request.Item[" ascii
-      $g4 = "\"unsafe\");" ascii
-      $g5 = "<%eval(" ascii
-      $g6 = "script language=" ascii
-      $g7 = "Request[" ascii
+//       $g1 = "Page language=" ascii
+//       $g2 = "<%@ Page" ascii
+//       $g3 = "Request.Item[" ascii
+//       $g4 = "\"unsafe\");" ascii
+//       $g5 = "<%eval(" ascii
+//       $g6 = "script language=" ascii
+//       $g7 = "Request[" ascii
 
-      $s1 = "gold8899" ascii /* HTTP Request Parameter */
-      $s2 = "exec_code" ascii /* HTTP Request Parameter */
-      $s3 = "orangenb" ascii /* HTTP Request Parameter */
-   condition:
-      filesize < 500KB and
-      $x1 at 0 and
-      ( 1 of ($s*) or 3 of ($g*) )
-}
+//       $s1 = "gold8899" ascii /* HTTP Request Parameter */
+//       $s2 = "exec_code" ascii /* HTTP Request Parameter */
+//       $s3 = "orangenb" ascii /* HTTP Request Parameter */
+//    condition:
+//       filesize < 500KB and
+//       $x1 at 0 and
+//       ( 1 of ($s*) or 3 of ($g*) )
+// }
 
 
 /* 
@@ -249,18 +249,18 @@ rule SUSP_ASPX_PossibleDropperArtifact_Aug21 {
       )
 }
 
-rule WEBSHELL_ProxyShell_Exploitation_Nov21_1 {
-   meta:
-      description = "Detects webshells dropped by DropHell malware"
-      author = "Florian Roth (Nextron Systems)"
-      reference = "https://www.deepinstinct.com/blog/do-not-exchange-it-has-a-shell-inside"
-      date = "2021-11-01"
-      score = 85
-      id = "300eaadf-db0c-5591-84fc-abdf7cdd90c1"
-   strings:
-      $s01 = ".LoadXml(System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(Request[" ascii wide
-      $s02 = "new System.IO.MemoryStream()" ascii wide
-      $s03 = "Transform(" ascii wide
-   condition:
-      all of ($s*)
-}
+// rule WEBSHELL_ProxyShell_Exploitation_Nov21_1 {
+//    meta:
+//       description = "Detects webshells dropped by DropHell malware"
+//       author = "Florian Roth (Nextron Systems)"
+//       reference = "https://www.deepinstinct.com/blog/do-not-exchange-it-has-a-shell-inside"
+//       date = "2021-11-01"
+//       score = 85
+//       id = "300eaadf-db0c-5591-84fc-abdf7cdd90c1"
+//    strings:
+//       $s01 = ".LoadXml(System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(Request[" ascii wide
+//       $s02 = "new System.IO.MemoryStream()" ascii wide
+//       $s03 = "Transform(" ascii wide
+//    condition:
+//       all of ($s*)
+// }

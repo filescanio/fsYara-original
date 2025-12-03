@@ -73,47 +73,47 @@ rule PAS_TOOL_PHP_WEB_KIT_mod {
       all of them
 }
 
-rule WebShell_PHP_Web_Kit_v3 {
-   meta:
-      description = "Detects PAS Tool PHP Web Kit"
-      reference = "https://github.com/wordfence/grizzly"
-      license = "Detection Rule License 1.1 https://github.com/Neo23x0/signature-base/blob/master/LICENSE"
-      author = "Florian Roth (Nextron Systems)"
-      date = "2016/01/01"
-      id = "dc5fa2c9-3e1e-594d-be4f-141e1f4915f1"
-   strings:
-      $php = "<?php $"
-      $php2 = "@assert(base64_decode($_REQUEST["
+// rule WebShell_PHP_Web_Kit_v3 {
+//    meta:
+//       description = "Detects PAS Tool PHP Web Kit"
+//       reference = "https://github.com/wordfence/grizzly"
+//       license = "Detection Rule License 1.1 https://github.com/Neo23x0/signature-base/blob/master/LICENSE"
+//       author = "Florian Roth (Nextron Systems)"
+//       date = "2016/01/01"
+//       id = "dc5fa2c9-3e1e-594d-be4f-141e1f4915f1"
+//    strings:
+//       $php = "<?php $"
+//       $php2 = "@assert(base64_decode($_REQUEST["
 
-      $s1 = "(str_replace(\"\\n\", '', '"
-      $s2 = "(strrev($" ascii
-      $s3 = "de'.'code';" ascii
-   condition:
-      ( ( uint32(0) == 0x68703f3c and $php at 0 ) or $php2 ) and
-      filesize > 8KB and filesize < 100KB and
-      all of ($s*)
-}
+//       $s1 = "(str_replace(\"\\n\", '', '"
+//       $s2 = "(strrev($" ascii
+//       $s3 = "de'.'code';" ascii
+//    condition:
+//       ( ( uint32(0) == 0x68703f3c and $php at 0 ) or $php2 ) and
+//       filesize > 8KB and filesize < 100KB and
+//       all of ($s*)
+// }
 
-rule WebShell_PHP_Web_Kit_v4 {
-   meta:
-      description = "Detects PAS Tool PHP Web Kit"
-      reference = "https://github.com/wordfence/grizzly"
-      license = "Detection Rule License 1.1 https://github.com/Neo23x0/signature-base/blob/master/LICENSE"
-      author = "Florian Roth (Nextron Systems)"
-      date = "2016/01/01"
-      id = "a5f915cd-b9c5-5cd3-b0a2-c15f6124737a"
-   strings:
-      $php = "<?php $"
+// rule WebShell_PHP_Web_Kit_v4 {
+//    meta:
+//       description = "Detects PAS Tool PHP Web Kit"
+//       reference = "https://github.com/wordfence/grizzly"
+//       license = "Detection Rule License 1.1 https://github.com/Neo23x0/signature-base/blob/master/LICENSE"
+//       author = "Florian Roth (Nextron Systems)"
+//       date = "2016/01/01"
+//       id = "a5f915cd-b9c5-5cd3-b0a2-c15f6124737a"
+//    strings:
+//       $php = "<?php $"
 
-      $s1 = "(StR_ReplAcE(\"\\n\",'',"
-      $s2 = ";if(PHP_VERSION<'5'){" ascii
-      $s3 = "=SuBstr_rePlACe(" ascii
-   condition:
-      uint32(0) == 0x68703f3c and 
-      $php at 0 and
-      filesize > 8KB and filesize < 100KB and
-      2 of ($s*)
-}
+//       $s1 = "(StR_ReplAcE(\"\\n\",'',"
+//       $s2 = ";if(PHP_VERSION<'5'){" ascii
+//       $s3 = "=SuBstr_rePlACe(" ascii
+//    condition:
+//       uint32(0) == 0x68703f3c and 
+//       $php at 0 and
+//       filesize > 8KB and filesize < 100KB and
+//       2 of ($s*)
+// }
 
 
 
