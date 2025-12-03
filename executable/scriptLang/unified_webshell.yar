@@ -3719,6 +3719,8 @@ rule WEBSHELL_PHP_By_String_Known_Webshell
         hash = "15c4e5225ff7811e43506f0e123daee869a8292fc8a38030d165cc3f6a488c95"
         hash = "0c845a031e06925c22667e101a858131bbeb681d78b5dbf446fdd5bca344d765"
         hash = "d52128bcfff5e9a121eab3d76382420c3eebbdb33cd0879fbef7c3426e819695"
+        hash = "fe6bc88380e298a6a9e980b57fa659ba93a421489623a20ec90bad0307393411"
+        hash = "2b9827df3a9ca5b9ead62d06fefc07885c5d4b0e2b45bb7c0dbacd2ff7f05f55"
 
         //TODO regex for 96d8ca3d269e98a330bdb7583cccdc85eab3682f9b64f98e4f42e55103a71636 would it be fast enough?
 
@@ -3782,6 +3784,14 @@ rule WEBSHELL_PHP_By_String_Known_Webshell
         $pbs88 = "edocne_46esab" wide ascii
         $pbs89 = "eval($_HEADERS" wide ascii
         $pbs90 = ">Infinity-Sh3ll<" ascii
+        $pbs91 = "Bu adda papka artiq movcuddur!" wide ascii
+        $pbs92 = "Get S.H.E.L.L.en" wide ascii
+        $pbs93 = "r00t-shell.com" nocase wide ascii
+        $pbs94 = "$_SERVER[\"\\x48TTPS" wide ascii
+        $pbs95 = "$_SERVER[\"\\x48TTP\\x53" wide ascii
+        $pbs96 = "https://www.adminer.org" wide ascii
+        $pbs97 = "%2A6%6C%72%6B%64%679%5F%65%68%63%73%77%6F4%2B%6637%6A" wide ascii
+        $pbs98 = "%6E1%7A%62%2F%6D%615%5C%76%740%6928%2D%70%78%75%71%79" wide ascii
 
         $front1 = "<?php eval(" nocase wide ascii
 
