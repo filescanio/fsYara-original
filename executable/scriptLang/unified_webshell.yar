@@ -8149,6 +8149,185 @@ rule webshell_php_by_string_obfuscation {
         any of ( $opbs* ) 
 }
 
+rule webshell_case_anomly {
+	meta:
+		description = "Casing anomly in typical webshell commands"
+		license = "https://creativecommons.org/licenses/by-nc/4.0/"
+		author = "Arnim Rupp"
+		date = "2021/05/11"
+        reference = "Idea from https://github.com/Neo23x0/signature-base/blob/master/yara/gen_case_anomalies.yar"
+        score = 70
+	strings:
+        $e = "eval" nocase fullword wide ascii
+        $en1 = "eval" fullword wide ascii
+        $en2 = "Eval" fullword wide ascii
+        $en3 = "EVAL" fullword wide ascii
+        $en4 = "$eVal" nocase fullword wide ascii
+        $a = "assert" nocase fullword wide ascii
+        $an1 = "assert" fullword wide ascii
+        $an2 = "Assert" fullword wide ascii
+        $an3 = "ASSERT" fullword wide ascii
+        $c = "CreateObject" nocase fullword wide ascii
+        $cn1 = "CreateObject" fullword wide ascii
+        $cn2 = "createobject" fullword wide ascii
+        $cn3 = "createObject" fullword wide ascii
+        $cn4 = "Createobject" fullword wide ascii
+        $cn5 = "CREATEOBJECT" fullword wide ascii
+        $f = "CreateTextFile" nocase fullword wide ascii
+        $fn1 = "CreateTextFile" fullword wide ascii
+        $fn2 = "createtextfile" fullword wide ascii
+        $fn3 = "createTextFile" fullword wide ascii
+        $fn4 = "CreatetextFile" fullword wide ascii
+        $fn5 = "CreateTextfile" fullword wide ascii
+        $fn6 = "createtextFile" fullword wide ascii
+        $fn7 = "Createtextfile" fullword wide ascii
+        $fn8 = "CREATETEXTFILE" fullword wide ascii
+        $s = "sqlclient" nocase fullword wide ascii
+        $sn1 = "sqlclient" fullword wide ascii
+        $sn2 = "SQLclient" fullword wide ascii
+        $sn3 = "SQLClient" fullword wide ascii
+        $sn4 = "sqlClient" fullword wide ascii
+        $sn5 = "SqlClient" fullword wide ascii
+        $sn6 = "SQLCLIENT" fullword wide ascii
+        $t = "ExecuteStatement" nocase fullword wide ascii
+        $tn1 = "ExecuteStatement" fullword wide ascii
+        $tn2 = "executestatement" fullword wide ascii
+        $tn3 = "Executestatement" fullword wide ascii
+        $tn4 = "executeStatement" fullword wide ascii
+        $tn5 = "EXECUTESTATEMENT" fullword wide ascii
+        $q = "select" nocase fullword wide ascii
+        $qn1 = "select" fullword wide ascii
+        $qn2 = "Select" fullword wide ascii
+        $qn3 = "SELECT" fullword wide ascii
+        $x = "execute" nocase fullword wide ascii
+        $xn1 = "execute" fullword wide ascii
+        $xn2 = "Execute" fullword wide ascii
+        $xn3 = "EXECUTE" fullword wide ascii
+        $r = "request" nocase fullword wide ascii
+        $rn1 = "request" fullword wide ascii
+        $rn2 = "Request" fullword wide ascii
+        $rn3 = "REQUEST" fullword wide ascii
+        // common typo
+        $rn4 = "REquest" fullword wide ascii
+
+        // capa_php_old_safe
+        $php_short = "<?" wide ascii
+		// prevent xml and asp from hitting with the short tag
+		$no_xml1 = "<?xml version" nocase wide ascii
+		$no_xml2 = "<?xml-stylesheet" nocase wide ascii
+		$no_asp1 = "<%@LANGUAGE" nocase wide ascii
+		$no_asp2 = /<script language="(vb|jscript|c#)/ nocase wide ascii
+		$no_pdf = "<?xpacket" 
+
+		// of course the new tags should also match
+        // already matched by "<?"
+		$php_new1 = /<\?=[^?]/ wide ascii
+		$php_new2 = "<?php" nocase wide ascii
+		$php_new3 = "<script language=\"php" nocase wide ascii
+
+        // capa_asp
+		$tagasp_short1 = /<%[^"]/ wide ascii
+        // also looking for %> to reduce fp (yeah, short atom but seldom since special chars)
+		$tagasp_short2 = "%>" wide ascii
+
+        // classids for scripting host etc
+		$tagasp_classid1 = "72C24DD5-D70A-438B-8A42-98424B88AFB8" nocase wide ascii
+		$tagasp_classid2 = "F935DC22-1CF0-11D0-ADB9-00C04FD58A0B" nocase wide ascii
+		$tagasp_classid3 = "093FF999-1EA0-4079-9525-9614C3504B74" nocase wide ascii
+		$tagasp_classid4 = "F935DC26-1CF0-11D0-ADB9-00C04FD58A0B" nocase wide ascii
+		$tagasp_classid5 = "0D43FE01-F093-11CF-8940-00A0C9054228" nocase wide ascii
+		$tagasp_long10 = "<%@ " wide ascii
+        // <% eval
+		$tagasp_long11 = /<% \w/ nocase wide ascii
+		$tagasp_long12 = "<%ex" nocase wide ascii
+		$tagasp_long13 = "<%ev" nocase wide ascii
+
+		$tagasp_long20 = /<(%|script|msxsl:script).{0,60}language="?(vb|jscript|c#)/ nocase wide ascii
+
+		$tagasp_long32 = /<script\s{1,30}runat=/ wide ascii
+		$tagasp_long33 = /<SCRIPT\s{1,30}RUNAT=/ wide ascii
+
+        // avoid hitting php
+        $php1 = "<?php"
+        $php2 = "<?="
+        // avoid hitting jsp
+        $jsp1 = "=\"java." wide ascii
+        $jsp2 = "=\"javax." wide ascii
+        $jsp3 = "java.lang." wide ascii
+        $jsp4 = "public" fullword wide ascii
+        $jsp5 = "throws" fullword wide ascii
+        $jsp6 = "getValue" fullword wide ascii
+        $jsp7 = "getBytes" fullword wide ascii
+
+        $perl1 = "PerlScript" fullword
+
+        // capa_jsp
+		$cjsp1 = "<%" ascii wide
+		$cjsp2 = "<jsp:" ascii wide
+		$cjsp3 = /language=[\"']java[\"\']/ ascii wide
+		// JSF
+		$cjsp4 = "/jstl/core" ascii wide
+
+	condition:
+        (
+            ( // capa_php_old_safe
+                (
+                    ( 
+                        $php_short in (0..100) or 
+                        $php_short in (filesize-1000..filesize)
+                    )
+                    and not any of ( $no_* )
+                ) or any of ( $php_new* )
+            ) or 
+            ( // capa_asp
+                (
+                    any of ( $tagasp_long* ) or
+                    // TODO: yara_push_private_rules.py doesn't do private rules in private rules yet
+                    any of ( $tagasp_classid* ) or
+                    (
+                        $tagasp_short1 and
+                        $tagasp_short2 in ( filesize-100..filesize ) 
+                    ) or (
+                        $tagasp_short2 and (
+                            $tagasp_short1 in ( 0..1000 ) or
+                            $tagasp_short1 in ( filesize-1000..filesize ) 
+                        )
+                    ) 
+                ) and not ( 
+                    (
+                        any of ( $perl* ) or
+                        $php1 at 0 or
+                        $php2 at 0 
+                    ) or (
+                        ( #jsp1 + #jsp2 + #jsp3 ) > 0 and ( #jsp4 + #jsp5 + #jsp6 + #jsp7 ) > 0
+                        )
+                )
+            ) or 
+            ( // capa_jsp
+                any of ( $cjsp* )
+            )
+        ) and
+        (
+            (
+                filesize < 500KB and
+                (
+                    ( #a > ( #an1 + #an2 + #an3 ) ) or
+                    ( #r > ( #rn1 + #rn2 + #rn3 + #rn4 ) ) or
+                    ( #q > ( #qn1 + #qn2 + #qn3 ) ) or
+                    ( #c > ( #cn1 + #cn2+ #cn3 + #cn4 + #cn5 ) ) or
+                    ( #t > ( #tn1 + #tn2+ #tn3 + #tn4 + #tn5 ) ) or
+                    ( #s > ( #sn1 + #sn2+ #sn3 + #sn4 + #sn5 + #sn6 ) ) or
+                    ( #f > ( #fn1 + #fn2+ #fn3 + #fn4 + #fn5 + #fn6 +#fn7 + #fn8 ) ) or
+                    ( #x > ( #xn1 + #xn2 + #xn3 ) )
+                )
+            ) or (
+                // eval is a short string, look only in small files to avoid fp in binary garbage:
+                filesize < 30KB and
+                ( #e > ( #en1 + #en2 + #en3 + #en4 ) )
+            )
+        )
+}
+
 // ===== Source: fsYara-original/executable/scriptLang/WShell_THOR_Webshells.yar =====
 
 /*
