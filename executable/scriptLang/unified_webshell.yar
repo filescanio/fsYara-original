@@ -6319,6 +6319,7 @@ rule WEBSHELL_ASP_Runtime_Compile : FILE {
         $asp_asp   = "<asp:" wide ascii
         $asp_text1 = ".text" wide ascii
         $asp_text2 = ".Text" wide ascii
+        $asp_url = "System.Web.HttpUtility.UrlDecode(" wide ascii
 
         $sus_refl1 = " ^= " wide ascii
         $sus_refl2 = "SharPy" wide ascii
