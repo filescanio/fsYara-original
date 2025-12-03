@@ -4126,6 +4126,7 @@ rule WEBSHELL_ASP_Writer
         $sus14= "\"unsafe" fullword wide ascii
         $sus15= "'unsafe" fullword wide ascii
         $sus16= "Army" fullword wide ascii
+        $sus17= "response.BinaryWrite" wide ascii
 
         //strings from private rule capa_asp
         $tagasp_short1 = /<%[^"]/ wide ascii
@@ -4208,6 +4209,7 @@ rule WEBSHELL_ASP_Writer
         //$asp_write_way_one1 = /\.open\b/ nocase wide ascii
         $asp_write_way_one2 = "SaveToFile" fullword nocase wide ascii
         $asp_write_way_one3 = "CREAtEtExtFiLE" fullword nocase wide ascii
+        $asp_write_way_one4 = "BinaryStream.WriteText" fullword nocase wide ascii
         $asp_cr_write1 = "CreateObject(" nocase wide ascii
         $asp_cr_write2 = "CreateObject (" nocase wide ascii
         $asp_streamwriter1 = "streamwriter" fullword nocase wide ascii
