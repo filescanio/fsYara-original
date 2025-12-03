@@ -8673,6 +8673,124 @@ rule WEBSHELL_PHP_Magic_Method
         )
 }
 
+rule WEBSHELL_PHP_Permission_Modification_Generic
+{
+    meta:
+        description = "PHP webshell has capability of change file permissions"
+        author = "Arnim Rupp modified by OPSWAT"
+        hash1 = "fe07af4384f079a92fcc6fafad3821823b17c941b18523fc59ab53d55db3a4ec"
+        score = 75
+    strings:
+
+        $perm1 = "chmod($_" wide ascii
+        $perm2 = "chown($_" wide ascii
+        $perm3 = "chgrp($_" wide ascii
+        $perm4 = "umask($_" wide ascii
+        $perm5= "fileperms($_" wide ascii
+        
+        // Action go with permission modification
+        $action1 = "unlink($_" wide ascii
+        $action2 = "symlink($_" wide ascii
+        $action3 = "link($_" wide ascii
+        $action4 = "readlink($_" wide ascii
+
+        //strings from private rule php_false_positive
+        // try to use only strings which would be flagged by themselves as suspicious by other rules, e.g. eval
+        // a good choice is a string with good atom quality = ideally 4 unusual characters next to each other
+        $gfp1  = "eval(\"return [$serialised_parameter" // elgg
+        $gfp2  = "$this->assert(strpos($styles, $"
+        $gfp3  = "$module = new $_GET['module']($_GET['scope']);"
+        $gfp4  = "$plugin->$_POST['action']($_POST['id']);"
+        $gfp5  = "$_POST[partition_by]($_POST["
+        $gfp6  = "$object = new $_REQUEST['type']($_REQUEST['id']);"
+        $gfp7  = "The above example code can be easily exploited by passing in a string such as" // ... ;)
+        $gfp8  = "Smarty_Internal_Debug::start_render($_template);"
+        $gfp9  = "?p4yl04d=UNION%20SELECT%20'<?%20system($_GET['command']);%20?>',2,3%20INTO%20OUTFILE%20'/var/www/w3bsh3ll.php"
+        $gfp10 = "[][}{;|]\\|\\\\[+=]\\|<?=>?"
+        $gfp11 = "(eval (getenv \"EPROLOG\")))"
+        $gfp12 = "ZmlsZV9nZXRfY29udGVudHMoJ2h0dHA6Ly9saWNlbnNlLm9wZW5jYXJ0LWFwaS5jb20vbGljZW5zZS5waHA/b3JkZXJ"
+
+        //strings from private rule capa_php_old_safe
+        $php_short = "<?" wide ascii
+        // prevent xml and asp from hitting with the short tag
+        $no_xml1 = "<?xml version" nocase wide ascii
+        $no_xml2 = "<?xml-stylesheet" nocase wide ascii
+        $no_asp1 = "<%@LANGUAGE" nocase wide ascii
+        $no_asp2 = /<script language="(vb|jscript|c#)/ nocase wide ascii
+        $no_pdf = "<?xpacket"
+
+        // of course the new tags should also match
+        // already matched by "<?"
+        $php_new1 = /<\?=[^?]/ wide ascii
+        $php_new2 = "<?php" nocase wide ascii
+        $php_new3 = "<script language=\"php" nocase wide ascii
+
+        //strings from private rule capa_php_input
+        $inp1 = "php://input" wide ascii
+        $inp2 = /_GET\s?\[/ wide ascii
+        // for passing $_GET to a function
+        $inp3 = /\(\s?\$_GET\s?\)/ wide ascii
+        $inp4 = /_POST\s?\[/ wide ascii
+        $inp5 = /\(\s?\$_POST\s?\)/ wide ascii
+        $inp6 = /_REQUEST\s?\[/ wide ascii
+        $inp7 = /\(\s?\$_REQUEST\s?\)/ wide ascii
+        $inp8 = /\(\s?\$_HEADERS\s?[\)\[]/ wide ascii
+        // PHP automatically adds all the request headers into the $_SERVER global array, prefixing each header name by the "HTTP_" string, so e.g. @eval($_SERVER['HTTP_CMD']) will run any code in the HTTP header CMD
+        $inp15 = "_SERVER['HTTP_" wide ascii
+        $inp16 = "_SERVER[\"HTTP_" wide ascii
+        $inp17 = /getenv[\t ]{0,20}\([\t ]{0,20}['"]HTTP_/ wide ascii
+        $inp18 = "array_values($_SERVER)" wide ascii
+        $inp19 = /file_get_contents\("https?:\/\// wide ascii
+        $inp20 = "TSOP_" wide ascii
+        $inp21 = /file_get_contents\(\$/ wide ascii
+
+        //strings from private rule capa_php_payload
+        // \([^)] to avoid matching on e.g. eval() in comments
+        $cpayload1 = /\beval[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        $cpayload2 = /\bexec[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        $cpayload3 = /\bshell_exec[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        $cpayload4 = /\bpassthru[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        $cpayload5 = /\bsystem[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        $cpayload6 = /\bpopen[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        $cpayload7 = /\bproc_open[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        $cpayload8 = /\bpcntl_exec[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        $cpayload9 = /\bassert[\n\t ]*\([^)0]/ nocase wide ascii
+        $cpayload10 = /\bpreg_replace[\n\t ]*(\(.{1,|\/\*)100}\/[ismxADSUXju]{0,11}(e|\\x65)/ nocase wide ascii
+        $cpayload12 = /\bmb_ereg_replace[\t ]*\([^\)]{1,100}'e'/ nocase wide ascii
+        $cpayload13 = /\bmb_eregi_replace[\t ]*\([^\)]{1,100}'e'/ nocase wide ascii
+        $cpayload20 = /\bcreate_function[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        $cpayload21 = /\bReflectionFunction[\n\t ]*(\([^)]|\/\*)/ nocase wide ascii
+        $cpayload22 = /fetchall\(PDO::FETCH_FUNC[\n\t ]*[,}\)]/ nocase wide ascii
+
+        $m_cpayload_preg_filter1 = /\bpreg_filter[\n\t ]*(\([^\)]|\/\*)/ nocase wide ascii
+        $m_cpayload_preg_filter2 = "'|.*|e'" nocase wide ascii
+
+    condition:
+        not (
+            any of ( $gfp* )
+        )
+        and (
+            (
+                (
+                        $php_short in (0..100) or
+                        $php_short in (filesize-1000..filesize)
+                )
+                and not any of ( $no_* )
+            )
+            or any of ( $php_new* )
+        )
+        and (
+            any of ( $inp* )
+        )
+        and (
+            any of ( $cpayload* ) or
+        all of ( $m_cpayload_preg_filter* )
+        )
+        and (
+            (any of ( $perm* )) and (any of ($action*))
+        )
+}
+
 // ===== Source: fsYara-original/executable/scriptLang/WShell_THOR_Webshells.yar =====
 
 /*
