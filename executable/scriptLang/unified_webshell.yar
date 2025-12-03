@@ -8427,6 +8427,67 @@ rule WEBSHELL_PHP_HEX_ENCODE
         )
 }
 
+rule WEBSHELL_PHP_Generic_Closure_Invoke
+{
+    meta:
+        description = "PHP webshell reconstruct of a callable function for execution on user input"
+        author = "Arnim Rupp modified by OPSWAT"
+        hash = "856beff7281e884c4c6e6ee98edbfd4c2e76f9372c8426f30f1681e0553f85ee"
+        score = 75
+    strings:
+        // Closure::fromCallable("system")->__invoke($_REQUEST[2]);
+        $closure_invoke = /Closure::fromCallable\((["'][^"']+["']|\$[A-Za-z_][A-Za-z0-9_]*)\)\s*->\s*__invoke\(\s*{?\$(_POST\[|_GET\[|_REQUEST\[|_SERVER\['HTTP_)/ wide ascii
+
+        //strings from private rule php_false_positive
+        // try to use only strings which would be flagged by themselves as suspicious by other rules, e.g. eval
+        // a good choice is a string with good atom quality = ideally 4 unusual characters next to each other
+        $gfp1  = "eval(\"return [$serialised_parameter" // elgg
+        $gfp2  = "$this->assert(strpos($styles, $"
+        $gfp3  = "$module = new $_GET['module']($_GET['scope']);"
+        $gfp4  = "$plugin->$_POST['action']($_POST['id']);"
+        $gfp5  = "$_POST[partition_by]($_POST["
+        $gfp6  = "$object = new $_REQUEST['type']($_REQUEST['id']);"
+        $gfp7  = "The above example code can be easily exploited by passing in a string such as" // ... ;)
+        $gfp8  = "Smarty_Internal_Debug::start_render($_template);"
+        $gfp9  = "?p4yl04d=UNION%20SELECT%20'<?%20system($_GET['command']);%20?>',2,3%20INTO%20OUTFILE%20'/var/www/w3bsh3ll.php"
+        $gfp10 = "[][}{;|]\\|\\\\[+=]\\|<?=>?"
+        $gfp11 = "(eval (getenv \"EPROLOG\")))"
+        $gfp12 = "ZmlsZV9nZXRfY29udGVudHMoJ2h0dHA6Ly9saWNlbnNlLm9wZW5jYXJ0LWFwaS5jb20vbGljZW5zZS5waHA/b3JkZXJ"
+
+        //strings from private rule capa_php_old_safe
+        $php_short = "<?" wide ascii
+        // prevent xml and asp from hitting with the short tag
+        $no_xml1 = "<?xml version" nocase wide ascii
+        $no_xml2 = "<?xml-stylesheet" nocase wide ascii
+        $no_asp1 = "<%@LANGUAGE" nocase wide ascii
+        $no_asp2 = /<script language="(vb|jscript|c#)/ nocase wide ascii
+        $no_pdf = "<?xpacket"
+
+        // of course the new tags should also match
+        // already matched by "<?"
+        $php_new1 = /<\?=[^?]/ wide ascii
+        $php_new2 = "<?php" nocase wide ascii
+        $php_new3 = "<script language=\"php" nocase wide ascii
+
+    condition:
+        not (
+            any of ( $gfp* )
+        )
+        and (
+            (
+                (
+                        $php_short in (0..100) or
+                        $php_short in (filesize-1000..filesize)
+                )
+                and not any of ( $no_* )
+            )
+            or any of ( $php_new* )
+        )
+        and (
+            $closure_invoke
+        ) and filesize < 400
+}
+
 // ===== Source: fsYara-original/executable/scriptLang/WShell_THOR_Webshells.yar =====
 
 /*
