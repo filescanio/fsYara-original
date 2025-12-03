@@ -6344,6 +6344,9 @@ rule WEBSHELL_ASP_Runtime_Compile : FILE {
                 any of ( $asp_form* ) and
                 any of ( $asp_text* ) and
                 $asp_asp
+            ) or
+            (
+                $asp_url
             )
         )
         and not any of ( $rc_fp* ) and
