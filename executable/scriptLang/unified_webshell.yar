@@ -8488,6 +8488,77 @@ rule WEBSHELL_PHP_Generic_Closure_Invoke
         ) and filesize < 400
 }
 
+rule WEBSHELL_PHP_OBFUSC_CUSTOM
+{
+    meta:
+        description = "PHP webshell obfuscated custom with new findings"
+        author = "Arnim Rupp modified by OPSWAT"
+        hash1 = "c0bf94d232c43c8b0727748110e07d59f70464b1553343262c1b194c09400831"
+        hash2 = "b8de0c915467be90f278943ab1e7560e3436bc44e953170fbb9b528b40e0d0e1"
+        score = 75
+    strings:
+        // $k= 'sh';
+        // $k.='el';
+        // $k.='l_e';
+        // $k.='xe';
+        // $k.='c';
+        $obf1 = /\$[A-Za-z_]\w*\s*=\s*['"][A-Za-z0-9_]+['"];\s*(\$[A-Za-z_]\w*\s*\.=\s*['"][A-Za-z0-9_]+['"];\s*)+/ wide ascii
+
+        // "GLOBAL obfuscation" with many many append strings from a GLOBAL characters array. Ex:
+        // $GLOBALS['a1f44'] = "\x35\x27\x9\x59\x7a\x55..."
+        // $GLOBALS[$GLOBALS['a1f44'][46].$GLOBALS['a1f44'][0].$GLOBALS['a1f44'][53].$GLOBALS['a1f44'][9]] = $GLOBALS['a1f44'][53].$GLOBALS['a1f44'][81]
+        $obf2 = ".$GLOBALS"
+
+        //strings from private rule php_false_positive
+        // try to use only strings which would be flagged by themselves as suspicious by other rules, e.g. eval
+        // a good choice is a string with good atom quality = ideally 4 unusual characters next to each other
+        $gfp1  = "eval(\"return [$serialised_parameter" // elgg
+        $gfp2  = "$this->assert(strpos($styles, $"
+        $gfp3  = "$module = new $_GET['module']($_GET['scope']);"
+        $gfp4  = "$plugin->$_POST['action']($_POST['id']);"
+        $gfp5  = "$_POST[partition_by]($_POST["
+        $gfp6  = "$object = new $_REQUEST['type']($_REQUEST['id']);"
+        $gfp7  = "The above example code can be easily exploited by passing in a string such as" // ... ;)
+        $gfp8  = "Smarty_Internal_Debug::start_render($_template);"
+        $gfp9  = "?p4yl04d=UNION%20SELECT%20'<?%20system($_GET['command']);%20?>',2,3%20INTO%20OUTFILE%20'/var/www/w3bsh3ll.php"
+        $gfp10 = "[][}{;|]\\|\\\\[+=]\\|<?=>?"
+        $gfp11 = "(eval (getenv \"EPROLOG\")))"
+        $gfp12 = "ZmlsZV9nZXRfY29udGVudHMoJ2h0dHA6Ly9saWNlbnNlLm9wZW5jYXJ0LWFwaS5jb20vbGljZW5zZS5waHA/b3JkZXJ"
+
+        //strings from private rule capa_php_old_safe
+        $php_short = "<?" wide ascii
+        // prevent xml and asp from hitting with the short tag
+        $no_xml1 = "<?xml version" nocase wide ascii
+        $no_xml2 = "<?xml-stylesheet" nocase wide ascii
+        $no_asp1 = "<%@LANGUAGE" nocase wide ascii
+        $no_asp2 = /<script language="(vb|jscript|c#)/ nocase wide ascii
+        $no_pdf = "<?xpacket"
+
+        // of course the new tags should also match
+        // already matched by "<?"
+        $php_new1 = /<\?=[^?]/ wide ascii
+        $php_new2 = "<?php" nocase wide ascii
+        $php_new3 = "<script language=\"php" nocase wide ascii
+
+    condition:
+        not (
+            any of ( $gfp* )
+        )
+        and (
+            (
+                (
+                        $php_short in (0..100) or
+                        $php_short in (filesize-1000..filesize)
+                )
+                and not any of ( $no_* )
+            )
+            or any of ( $php_new* )
+        )
+        and (
+            (#obf1 > 2) or (#obf2 > 200)
+        )
+}
+
 // ===== Source: fsYara-original/executable/scriptLang/WShell_THOR_Webshells.yar =====
 
 /*
