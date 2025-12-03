@@ -4026,6 +4026,14 @@ rule WEBSHELL_PHP_Writer
         $sus16= "Army" fullword wide ascii
         $sus17= "error_reporting( 0 )" wide ascii
         $sus18= "' . '" wide ascii
+        $sus19 = "opendir(" wide ascii
+        $sus20 = "readdir(" wide ascii
+        $sus21 = "is_writable(" wide ascii
+        $sus22 = "is_readable(" wide ascii
+        $sus23 = "scandir(" wide ascii
+        $sus24 = "mkdir(" wide ascii
+        $sus25 = "chmod($_" wide ascii
+        $sus26 = "fileperms($_" wide ascii
 
         //strings from private rule capa_php_old_safe
         $php_short = "<?" wide ascii
@@ -4088,6 +4096,9 @@ rule WEBSHELL_PHP_Writer
             filesize < 400 or
             (
                 filesize < 4000 and 1 of ( $sus* )
+            ) or 
+            (
+                filesize < 15000 and 3 of ( $sus* )
             )
         )
 }
