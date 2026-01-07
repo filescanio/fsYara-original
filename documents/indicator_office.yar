@@ -220,9 +220,9 @@ rule INDICATOR_RTF_EXPLOIT_CVE_2017_8759_1 {
 
 rule INDICATOR_RTF_EXPLOIT_CVE_2017_8759_2 {
     meta:
-        description = "detects CVE-2017-8759 weaponized RTF documents."
+        description = "detects potentially CVE-2017-8759 weaponized RTF documents."
         author = "ditekSHen"
-        score = 80
+        score = 60
     strings:
         // Msxml2.SAXXMLReader.
         // 88D96A0C-F192-11D4-A65F-0040963251E5: Msxml2.SAXXMLReader.6
@@ -246,7 +246,7 @@ rule INDICATOR_RTF_EXPLOIT_CVE_2017_8759_2 {
         // SOAP Moniker
         $soap1 = "c7b0abec197fd211978e0000f8757e" ascii nocase
     condition:
-        uint32(0) == 0x74725c7b and 1 of ($clsid*) and 1 of ($ole*) and (2 of ($obj*) or 1 of ($soap*))
+        uint32(0) == 0x74725c7b and 1 of ($clsid*) and 1 of ($ole*) and (3 of ($obj*) or 1 of ($soap*))
 }
 
 rule INDICATOR_RTF_Exploit_Scripting {
