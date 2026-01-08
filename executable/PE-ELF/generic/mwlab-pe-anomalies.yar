@@ -230,19 +230,19 @@ rule pe_code_section_and_no_executable
             )
 }
 
-rule pe_high_ntrpy_section
-{
-    meta:
-        description = "PE file with section ntrpy higher than 7"
-        score = 50
-
-    condition:
-        pe.is_pe and
-        for any section in pe.sections:
-        	(
-            	math.entropy(section.raw_data_offset, section.raw_data_size) >= 7
-            )
-}
+//rule pe_high_ntrpy_section
+//{
+//    meta:
+//        description = "PE file with section ntrpy higher than 7"
+//        score = 50
+//
+//    condition:
+//        pe.is_pe and
+//        for any section in pe.sections:
+//        	(
+//            	math.entropy(section.raw_data_offset, section.raw_data_size) >= 7
+//            )
+//}
 
 // more common in benign samples than expected
 //rule pe_multiple_executable_sections
