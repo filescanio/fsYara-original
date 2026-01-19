@@ -5,17 +5,17 @@ import "dotnet"
 
 ///// pe header /////
 
-rule pe_timestamp_in_future
-{
-    meta:
-        description = "PE TimeDateStamp is set in future"
-        score = 50
-
-    condition:
-        pe.is_pe and
-        pe.timestamp > time.now() and
-        pe.timestamp - time.now() > 86400  // more than 1 day ahead
-}
+//rule pe_timestamp_in_future
+//{
+//    meta:
+//        description = "PE TimeDateStamp is set in future"
+//        score = 50
+//
+//    condition:
+//        pe.is_pe and
+//        pe.timestamp > time.now() and
+//        pe.timestamp - time.now() > 86400  // more than 1 day ahead
+//}
 
 
 // trigger with many benign samples
@@ -42,193 +42,193 @@ rule pe_timestamp_in_future
 //}
 
 
-rule pe_susp_number_data_directories
-{
-    meta:
-        description = "PE with non common number of data directories value"
-        score = 50
+//rule pe_susp_number_data_directories
+//{
+//    meta:
+//        description = "PE with non common number of data directories value"
+//        score = 50
+//
+//    condition:
+//	   pe.is_pe and
+//	   pe.number_of_rva_and_sizes != 16
+//}
 
-    condition:
-	   pe.is_pe and
-	   pe.number_of_rva_and_sizes != 16
-}
+//rule pe_unusual_entrypoint_section
+//{
+//    meta:
+//        description = "First section is not entrypoint section"
+//        score = 50
+//    condition:
+//        pe.is_pe and
+//        pe.entry_point != 0 and
+//        not pe.is_dll() and
+//        not (pe.entry_point >= pe.sections[0].raw_data_offset and
+//         pe.entry_point <  pe.sections[0].raw_data_offset + pe.sections[0].raw_data_size)
+//}
 
-rule pe_unusual_entrypoint_section
-{
-    meta:
-        description = "First section is not entrypoint section"
-        score = 50
-    condition:
-        pe.is_pe and
-        pe.entry_point != 0 and
-        not pe.is_dll() and
-        not (pe.entry_point >= pe.sections[0].raw_data_offset and
-         pe.entry_point <  pe.sections[0].raw_data_offset + pe.sections[0].raw_data_size)
-}
-
-rule pe_characteristics_dll_but_not_dll
-{
-    meta:
-        description = "PE has DLL characteristic flag set but lacks export directory"
-        score = 50
-
-    condition:
-        not dotnet.is_dotnet and
-        pe.is_pe and
-        pe.characteristics & pe.DLL and
-        pe.number_of_exports == 0
-        and for any section in pe.sections: // revome common fp: dll with only resources
-            (
-                section.name == ".text" or section.name == ".code"
-            )
-}
+//rule pe_characteristics_dll_but_not_dll
+//{
+//    meta:
+//        description = "PE has DLL characteristic flag set but lacks export directory"
+//        score = 50
+//
+//    condition:
+//        not dotnet.is_dotnet and
+//        pe.is_pe and
+//        pe.characteristics & pe.DLL and
+//        pe.number_of_exports == 0
+//        and for any section in pe.sections: // revome common fp: dll with only resources
+//            (
+//                section.name == ".text" or section.name == ".code"
+//            )
+//}
 
 
 
 ///// sections /////
 
-rule pe_number_of_sections_uncommon
-{
-    meta:
-        description = "PE has an unusual number of sections (<2 or >10)"
-        score = 50
+//rule pe_number_of_sections_uncommon
+//{
+//    meta:
+//        description = "PE has an unusual number of sections (<2 or >10)"
+//        score = 50
+//
+//    condition:
+//        not dotnet.is_dotnet and
+//        pe.is_pe and
+//        not pe.is_dll() and
+//        (
+//            pe.number_of_sections < 2 or
+//            pe.number_of_sections > 10
+//        )
+//}
 
-    condition:
-        not dotnet.is_dotnet and
-        pe.is_pe and
-        not pe.is_dll() and
-        (
-            pe.number_of_sections < 2 or
-            pe.number_of_sections > 10
-        )
-}
 
+//rule pe_purely_vrtl_executable_section
+//{
+//    meta:
+//        description = "PE section is executable, purely vrtl (SizeOfRawData == 0)"
+//        score = 50
+//
+//    condition:
+//        pe.is_pe and
+//        for any section in pe.sections:
+//            (
+//                section.raw_data_size == 0 and
+//                section.virtual_size > 0 and
+//                	(
+//                		section.characteristics & pe.SECTION_CNT_CODE != 0 or
+//                		section.characteristics & pe.SECTION_MEM_EXECUTE != 0
+//                	)
+//            )
+//}
 
-rule pe_purely_vrtl_executable_section
-{
-    meta:
-        description = "PE section is executable, purely vrtl (SizeOfRawData == 0)"
-        score = 50
+//rule pe_purely_physical_section
+//{
+//    meta:
+//        description = "PE section is physical-only and will not be mapped in memory"
+//        score = 50
+//
+//    condition:
+//        pe.is_pe and
+//        for any section in pe.sections:
+//            (
+//                section.raw_data_size > 0 and
+//                section.virtual_size == 0
+//            )
+//}
 
-    condition:
-        pe.is_pe and
-        for any section in pe.sections:
-            (
-                section.raw_data_size == 0 and
-                section.virtual_size > 0 and
-                	(
-                		section.characteristics & pe.SECTION_CNT_CODE != 0 or
-                		section.characteristics & pe.SECTION_MEM_EXECUTE != 0
-                	)
-            )
-}
+//rule pe_unbalanced_vrtl_physical_ratio
+//{
+//    meta:
+//        description = "PE section with large difference between physical and vrtl size"
+//        score = 50
+//
+//    condition:
+//    	pe.is_pe and
+//        for any section in pe.sections:
+//            (
+//                section.raw_data_size > 0 and
+//                section.virtual_size > 0 and
+//                (
+//                    section.virtual_size > section.raw_data_size + 0x10000 or
+//                    section.raw_data_size > section.virtual_size + 0x10000
+//                )
+//            )
+//}
 
-rule pe_purely_physical_section
-{
-    meta:
-        description = "PE section is physical-only and will not be mapped in memory"
-        score = 50
+//rule pe_section_wx
+//{
+//    meta:
+//        description = "PE section is both executable and writable"
+//
+//    condition:
+//        pe.is_pe and
+//        for any section in pe.sections:
+//            (
+//                section.characteristics & pe.SECTION_MEM_EXECUTE != 0 and
+//                section.characteristics & pe.SECTION_MEM_WRITE != 0
+//            )
+//}
 
-    condition:
-        pe.is_pe and
-        for any section in pe.sections:
-            (
-                section.raw_data_size > 0 and
-                section.virtual_size == 0
-            )
-}
+//rule pe_section_rwx
+//{
+//    meta:
+//        description = "PE section is readable, executable and writable"
+//        score = 50
+//
+//    condition:
+//        pe.is_pe and
+//        for any section in pe.sections:
+//            (
+//                section.characteristics & pe.SECTION_MEM_READ != 0 and
+//                section.characteristics & pe.SECTION_MEM_EXECUTE != 0 and
+//                section.characteristics & pe.SECTION_MEM_WRITE != 0
+//            )
+//}
 
-rule pe_unbalanced_vrtl_physical_ratio
-{
-    meta:
-        description = "PE section with large difference between physical and vrtl size"
-        score = 50
+//rule pe_section_no_name
+//{
+//    meta:
+//        description = "PE section name is empty"
+//
+//    condition:
+//        pe.is_pe and
+//        for any section in pe.sections:
+//        	(
+//            	section.name == ""
+//            )
+//}
 
-    condition:
-    	pe.is_pe and
-        for any section in pe.sections:
-            (
-                section.raw_data_size > 0 and
-                section.virtual_size > 0 and
-                (
-                    section.virtual_size > section.raw_data_size + 0x10000 or
-                    section.raw_data_size > section.virtual_size + 0x10000
-                )
-            )
-}
+//rule pe_executable_section_and_no_code
+//{
+//    meta:
+//        description = "PE executable section is flagged as not containing code"
+//        score = 50
+//
+//    condition:
+//        pe.is_pe and
+//        for any section in pe.sections:
+//            (
+//                section.characteristics & pe.SECTION_MEM_EXECUTE != 0 and
+//                section.characteristics & pe.SECTION_CNT_CODE == 0
+//            )
+//}
 
-rule pe_section_wx
-{
-    meta:
-        description = "PE section is both executable and writable"
-
-    condition:
-        pe.is_pe and
-        for any section in pe.sections:
-            (
-                section.characteristics & pe.SECTION_MEM_EXECUTE != 0 and
-                section.characteristics & pe.SECTION_MEM_WRITE != 0
-            )
-}
-
-rule pe_section_rwx
-{
-    meta:
-        description = "PE section is readable, executable and writable"
-        score = 50
-
-    condition:
-        pe.is_pe and
-        for any section in pe.sections:
-            (
-                section.characteristics & pe.SECTION_MEM_READ != 0 and
-                section.characteristics & pe.SECTION_MEM_EXECUTE != 0 and
-                section.characteristics & pe.SECTION_MEM_WRITE != 0
-            )
-}
-
-rule pe_section_no_name
-{
-    meta:
-        description = "PE section name is empty"
-
-    condition:
-        pe.is_pe and
-        for any section in pe.sections:
-        	(
-            	section.name == ""
-            )
-}
-
-rule pe_executable_section_and_no_code
-{
-    meta:
-        description = "PE executable section is flagged as not containing code"
-        score = 50
-
-    condition:
-        pe.is_pe and
-        for any section in pe.sections:
-            (
-                section.characteristics & pe.SECTION_MEM_EXECUTE != 0 and
-                section.characteristics & pe.SECTION_CNT_CODE == 0
-            )
-}
-
-rule pe_code_section_and_no_executable
-{
-    meta:
-        description = "PE section is marked as code but is not executable"
-        score = 50
-
-    condition:
-        pe.is_pe and
-        for any section in pe.sections:
-            (
-                section.characteristics & pe.SECTION_CNT_CODE != 0 and
-                section.characteristics & pe.SECTION_MEM_EXECUTE == 0
-            )
-}
+//rule pe_code_section_and_no_executable
+//{
+//    meta:
+//        description = "PE section is marked as code but is not executable"
+//        score = 50
+//
+//    condition:
+//        pe.is_pe and
+//        for any section in pe.sections:
+//            (
+//                section.characteristics & pe.SECTION_CNT_CODE != 0 and
+//                section.characteristics & pe.SECTION_MEM_EXECUTE == 0
+//            )
+//}
 
 //rule pe_high_ntrpy_section
 //{
@@ -295,144 +295,144 @@ rule pe_overlapping_sections
 
 ///// imports /////
 
-rule pe_no_import_table
-{
-    meta:
-        description = "PE Import Table is missing"
-
-    condition:
-        not dotnet.is_dotnet and
-        pe.is_pe and
-        not pe.is_dll() and
-        (
-            pe.number_of_rva_and_sizes <= pe.IMAGE_DIRECTORY_ENTRY_IMPORT or
-            pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_IMPORT].virtual_address == 0 or
-            pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_IMPORT].size == 0
-        )
-}
-
-
-rule pe_zero_imports
-{
-    meta:
-        description = "PE does not imports functions"
-
-    condition:
-        not dotnet.is_dotnet and
-        pe.is_pe and
-        not pe.is_dll() and
-        pe.number_of_imported_functions == 0
-}
+//rule pe_no_import_table
+//{
+//    meta:
+//        description = "PE Import Table is missing"
+//
+//    condition:
+//        not dotnet.is_dotnet and
+//        pe.is_pe and
+//        not pe.is_dll() and
+//        (
+//            pe.number_of_rva_and_sizes <= pe.IMAGE_DIRECTORY_ENTRY_IMPORT or
+//            pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_IMPORT].virtual_address == 0 or
+//            pe.data_directories[pe.IMAGE_DIRECTORY_ENTRY_IMPORT].size == 0
+//        )
+//}
 
 
-rule pe_very_low_imports
-{
-    meta:
-        description = "PE imports few functions"
-
-    condition:
-        not dotnet.is_dotnet and
-        pe.is_pe and
-        not pe.is_dll() and
-        pe.number_of_imported_functions <= 5
-}
-
-
-rule pe_imports_by_ordinal
-{
-    meta:
-        description = "Detect PE imports using function ordinals (no named imports)"
-
-    condition:
-        pe.is_pe and
-        for any i in (0 .. pe.number_of_imports - 1) :
-        	(
-        		for any function in pe.import_details[i].functions :
-        			(
-        				function.name == "" and
-        				function.ordinal != 0
-        			)
-        	)
-}
+//rule pe_zero_imports
+//{
+//    meta:
+//        description = "PE does not imports functions"
+//
+//    condition:
+//        not dotnet.is_dotnet and
+//        pe.is_pe and
+//        not pe.is_dll() and
+//        pe.number_of_imported_functions == 0
+//}
 
 
-rule pe_gui_and_no_window_apis
-{
-    meta:
-        description = "PE with SUBSYSTEM_WINDOWS_GUI but no related imports"
-
-    condition:
-        not dotnet.is_dotnet and
-        pe.is_pe and
-        not pe.is_dll() and // fp
-        pe.subsystem == pe.SUBSYSTEM_WINDOWS_GUI and
-        (not pe.imports(/user32.dll/i,/(CreateWindow|CreateDialogIndirectParam|DialogBoxIndirectParam|DialogBoxParam|DispatchMessage|DefDlgProc|MessageBox|GetDC)/i) > 0
-        and
-        not pe.imports(/mscoree.dll/i,/\_CorExeMain/i) > 0 // avoid fp with dotnet
-        )
-}
+//rule pe_very_low_imports
+//{
+//    meta:
+//        description = "PE imports few functions"
+//
+//    condition:
+//        not dotnet.is_dotnet and
+//        pe.is_pe and
+//        not pe.is_dll() and
+//        pe.number_of_imported_functions <= 5
+//}
 
 
-rule pe_dynamic_api_resolution_imports
-{
-    meta:
-        description = "PE imports few functions, including LoadLibrary and GetProcAddress"
-
-    condition:
-        pe.is_pe and
-        pe.number_of_imported_functions <= 5 and
-        pe.imports(/kernel32.dll/i, /loadlibrary(a|w)|getprocaddress/i) == 2
-}
-
-
-rule pe_dynamic_download_imports
-{
-    meta:
-        description = "Download API strings but not in import table"
-        score = 50
-
-    strings:
-    	$download_api = /internetreadfile|internetconnect[aw]|\brecvfrom\b/i
-
-    condition:
-        pe.is_pe and
-        #download_api > 0 and
-        not (pe.version_info["CompanyName"] contains "Microsoft" and pe.is_dll()) and // common fp
-        pe.imports(/wininet.dll/i, /internetreadfile|internetconnect[aw]/i) == 0 and
-        pe.imports(/ws2_32.dll/i, /recvfrom/i) == 0
-}
+//rule pe_imports_by_ordinal
+//{
+//    meta:
+//        description = "Detect PE imports using function ordinals (no named imports)"
+//
+//    condition:
+//        pe.is_pe and
+//        for any i in (0 .. pe.number_of_imports - 1) :
+//        	(
+//        		for any function in pe.import_details[i].functions :
+//        			(
+//        				function.name == "" and
+//        				function.ordinal != 0
+//        			)
+//        	)
+//}
 
 
-rule pe_dynamic_crypto_imports
-{
-    meta:
-        description = "Crypto API strings but not in import table"
-        score = 50
+//rule pe_gui_and_no_window_apis
+//{
+//    meta:
+//        description = "PE with SUBSYSTEM_WINDOWS_GUI but no related imports"
+//
+//    condition:
+//        not dotnet.is_dotnet and
+//        pe.is_pe and
+//        not pe.is_dll() and // fp
+//        pe.subsystem == pe.SUBSYSTEM_WINDOWS_GUI and
+//        (not pe.imports(/user32.dll/i,/(CreateWindow|CreateDialogIndirectParam|DialogBoxIndirectParam|DialogBoxParam|DispatchMessage|DefDlgProc|MessageBox|GetDC)/i) > 0
+//        and
+//        not pe.imports(/mscoree.dll/i,/\_CorExeMain/i) > 0 // avoid fp with dotnet
+//        )
+//}
+//
 
-    strings:
-    	$crypto_api = /Crypt(ReleaseContext|AcquireContextA|DestroyHash|HashData|DestroyKey|DeriveKey|Encrypt|Decrypt)/i
+//rule pe_dynamic_api_resolution_imports
+//{
+//    meta:
+//        description = "PE imports few functions, including LoadLibrary and GetProcAddress"
+//
+//    condition:
+//        pe.is_pe and
+//        pe.number_of_imported_functions <= 5 and
+//        pe.imports(/kernel32.dll/i, /loadlibrary(a|w)|getprocaddress/i) == 2
+//}
 
-    condition:
-        pe.is_pe and
-        #crypto_api > 0 and
-        pe.imports(/advapi32.dll/i, /Crypt(ReleaseContext|AcquireContextA|DestroyHash|HashData|DestroyKey|DeriveKey|Encrypt|Decrypt)/i) == 0
-}
 
-rule pe_dynamic_injection_imports
-{
-    meta:
-        description = "Injection API strings but not in import table"
-        score = 50
+//rule pe_dynamic_download_imports
+//{
+//    meta:
+//        description = "Download API strings but not in import table"
+//        score = 50
+//
+//    strings:
+//    	$download_api = /internetreadfile|internetconnect[aw]|\brecvfrom\b/i
+//
+//    condition:
+//        pe.is_pe and
+//        #download_api > 0 and
+//        not (pe.version_info["CompanyName"] contains "Microsoft" and pe.is_dll()) and // common fp
+//        pe.imports(/wininet.dll/i, /internetreadfile|internetconnect[aw]/i) == 0 and
+//        pe.imports(/ws2_32.dll/i, /recvfrom/i) == 0
+//}
 
-    strings:
-    	$injection_api = /(VirtualProtect(Ex)?|VirtualAlloc(Ex(Numa)?)?|ResumeThread|SetThreadContext|FindResourceA|LockResource|LoadResource|Ldr(AccessResource|FindResource_U)|Nt(ResumeThread|AllocateVirtualMemory|MapViewOfSection|ProtectVirtualMemory))/i
 
-    condition:
-        pe.is_pe and
-        #injection_api > 3 and
-        pe.imports(/kernel32.dll/i, /(VirtualProtect(Ex)?|VirtualAlloc(Ex(Numa)?)?|ResumeThread|SetThreadContext|FindResourceA|LockResource|LoadResource)/i) == 0 and
-        pe.imports(/ntdll.dll/i, /(Ldr(AccessResource|FindResource_U)|Nt(ResumeThread|AllocateVirtualMemory|MapViewOfSection|ProtectVirtualMemory))/i) == 0
-}
+//rule pe_dynamic_crypto_imports
+//{
+//    meta:
+//        description = "Crypto API strings but not in import table"
+//        score = 50
+//
+//    strings:
+//    	$crypto_api = /Crypt(ReleaseContext|AcquireContextA|DestroyHash|HashData|DestroyKey|DeriveKey|Encrypt|Decrypt)/i
+//
+//    condition:
+//        pe.is_pe and
+//        #crypto_api > 0 and
+//        pe.imports(/advapi32.dll/i, /Crypt(ReleaseContext|AcquireContextA|DestroyHash|HashData|DestroyKey|DeriveKey|Encrypt|Decrypt)/i) == 0
+//}
+
+//rule pe_dynamic_injection_imports
+//{
+//    meta:
+//        description = "Injection API strings but not in import table"
+//        score = 50
+//
+//    strings:
+//    	$injection_api = /(VirtualProtect(Ex)?|VirtualAlloc(Ex(Numa)?)?|ResumeThread|SetThreadContext|FindResourceA|LockResource|LoadResource|Ldr(AccessResource|FindResource_U)|Nt(ResumeThread|AllocateVirtualMemory|MapViewOfSection|ProtectVirtualMemory))/i
+//
+//    condition:
+//        pe.is_pe and
+//        #injection_api > 3 and
+//        pe.imports(/kernel32.dll/i, /(VirtualProtect(Ex)?|VirtualAlloc(Ex(Numa)?)?|ResumeThread|SetThreadContext|FindResourceA|LockResource|LoadResource)/i) == 0 and
+//        pe.imports(/ntdll.dll/i, /(Ldr(AccessResource|FindResource_U)|Nt(ResumeThread|AllocateVirtualMemory|MapViewOfSection|ProtectVirtualMemory))/i) == 0
+//}
 
 
 ///// signature /////
@@ -458,111 +458,111 @@ rule pe_dynamic_injection_imports
 //         not pe.is_signed // signature validation
 // }
 
-rule pe_signature_expired
-{
-    meta:
-        description = "PE signature has expired"
-    condition:
-        pe.is_pe and
-        for any signature in pe.signatures:
-        	(
-            	signature.not_after < time.now()
-            )
-}
+//rule pe_signature_expired
+//{
+//    meta:
+//        description = "PE signature has expired"
+//    condition:
+//        pe.is_pe and
+//        for any signature in pe.signatures:
+//        	(
+//            	signature.not_after < time.now()
+//            )
+//}
 
-rule pe_signature_expires_soon
-{
-    meta:
-        description = "PE signature expires soon"
-    condition:
-        pe.is_pe and
-        for any signature in pe.signatures:
-        	(
-            	not signature.not_after < time.now() and // covered with pe_signature_expired
-                signature.not_after < time.now() + 86400 * 15  // 15 days
-            )
-}
+//rule pe_signature_expires_soon
+//{
+//    meta:
+//        description = "PE signature expires soon"
+//    condition:
+//        pe.is_pe and
+//        for any signature in pe.signatures:
+//        	(
+//            	not signature.not_after < time.now() and // covered with pe_signature_expired
+//                signature.not_after < time.now() + 86400 * 15  // 15 days
+//            )
+//}
 
 
 ///// resources, overlay, and embedded files /////
 
 
-rule pe_high_ntrpy_resource_no_image
-{
-    meta:
-        description = "PE with embedded resource with high ntrpy (rcdata)"
-        score = 50
+//rule pe_high_ntrpy_resource_no_image
+//{
+//    meta:
+//        description = "PE with embedded resource with high ntrpy (rcdata)"
+//        score = 50
+//
+//    condition:
+//        pe.is_pe and
+//        pe.number_of_resources > 0 and
+//        for any resource in pe.resources:
+//        	(
+//                resource.length > 1024 and
+//                resource.type == pe.RESOURCE_TYPE_RCDATA and
+//                math.entropy(resource.offset, resource.length) >= 7
+//        	)
+//}
 
-    condition:
-        pe.is_pe and
-        pe.number_of_resources > 0 and
-        for any resource in pe.resources:
-        	(
-                resource.length > 1024 and
-                resource.type == pe.RESOURCE_TYPE_RCDATA and
-                math.entropy(resource.offset, resource.length) >= 7
-        	)
-}
+//rule pe_large_overlay
+//{
+//    meta:
+//        description = "PE with a large overlay"
+//        score = 50
+//
+//    condition:
+//        pe.is_pe and
+//        pe.overlay.size > 20480 // 20KB
+//}
 
-rule pe_large_overlay
-{
-    meta:
-        description = "PE with a large overlay"
-        score = 50
+//rule pe_high_ntrpy_overlay
+//{
+//    meta:
+//        description = "PE overlay with high ntrpy"
+//        score = 50
+//
+//    strings:
+//        $cert_crl = "http://crl."
+//
+//    condition:
+//        pe.is_pe and
+//        pe.overlay.size > 1024 and
+//        $cert_crl in (pe.overlay.offset..pe.overlay.size) and // fp overlay != signature
+//        math.entropy(pe.overlay.offset, pe.overlay.size) >= 7
+//}
 
-    condition:
-        pe.is_pe and
-        pe.overlay.size > 20480 // 20KB
-}
+//rule pe_embedded_pe
+//{
+//    meta:
+//        description = "Discover embedded PE files, without relying on easily stripped/modified header strings."
+//        score = 50
+//    strings:
+//        $mz = { 4D 5A }
+//    condition:
+//        for any i in (1..#mz):
+//        (
+//            @mz[i] != 0 and uint32(@mz[i] + uint32(@mz[i] + 0x3C)) == 0x00004550
+//        )
+//}
 
-rule pe_high_ntrpy_overlay
-{
-    meta:
-        description = "PE overlay with high ntrpy"
-        score = 50
-
-    strings:
-        $cert_crl = "http://crl."
-
-    condition:
-        pe.is_pe and
-        pe.overlay.size > 1024 and
-        $cert_crl in (pe.overlay.offset..pe.overlay.size) and // fp overlay != signature
-        math.entropy(pe.overlay.offset, pe.overlay.size) >= 7
-}
-
-rule pe_embedded_pe
-{
-    meta:
-        description = "Discover embedded PE files, without relying on easily stripped/modified header strings."
-        score = 50
-    strings:
-        $mz = { 4D 5A }
-    condition:
-        for any i in (1..#mz):
-        (
-            @mz[i] != 0 and uint32(@mz[i] + uint32(@mz[i] + 0x3C)) == 0x00004550
-        )
-}
-
-rule pe_embedded_x509_cert
-{
-  meta:
-    description = "detect executable that likely have an embedded x509 certificate"
-    score = 50
-
-  strings:
-    $cert = "BEGIN CERTIFICATE" nocase ascii wide
-    $cert_xor = "BEGIN CERTIFICATE" xor(0x01-0xff)
-    $cert_base64 = "BEGIN CERTIFICATE" base64 base64wide
-    $cert_flipflop = "EBIG NECTRFICITAE" nocase ascii wide
-    $cert_reverse = "ETACIFITREC NIGEB" nocase ascii wide
-    $cert_hex = "424547494e204345525449464943415445" nocase ascii wide
-
-  condition:
-  	pe.is_pe and
-    any of them
-}
+//rule pe_embedded_x509_cert
+//{
+//  meta:
+//    description = "detect executable that likely have an embedded x509 certificate"
+//    score = 50
+//
+//  strings:
+//    $cert = "BEGIN CERTIFICATE" nocase ascii wide
+//    $cert_xor = "BEGIN CERTIFICATE" xor(0x01-0xff)
+//    $cert_base64 = "BEGIN CERTIFICATE" base64 base64wide
+//    $cert_flipflop = "EBIG NECTRFICITAE" nocase ascii wide
+//    $cert_reverse = "ETACIFITREC NIGEB" nocase ascii wide
+//    $cert_hex = "424547494e204345525449464943415445" nocase ascii wide
+//
+//  condition:
+//  	pe.is_pe and
+//    any of them
+//}
 
 rule pe_resource_reversed_pe
 {
