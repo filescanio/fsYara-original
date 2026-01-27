@@ -155,7 +155,7 @@ def process_yara_ruleset(yara_ruleset, strip_comments=True):
     if len(rules) == 0:
         # invalid yara ruleset
         logging.warning("[Zero rules] File contains no YARA rules (possibly only comments)")
-        success = False
+        success = True # still return success, since we have nothing to do here
         hex_ruleset = "// Removed content due to ruleset being empty or only comments" # leave a comment in the yara file
         return hex_ruleset, success
 
