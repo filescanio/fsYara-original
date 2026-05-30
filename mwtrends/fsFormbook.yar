@@ -238,22 +238,3 @@ rule Windows_Trojan_Formbook : FormBook_malware
 	condition:
 		3 of them
 }
-
-rule fsFormbook
-{
-	meta:
-		description = "FsYARA - Malware Trends"
-		vetted_family = "formbook"
-		score = 75
-
-	condition:
-		Formbook or 
-		Windows_Trojan_Formbook_1112e116 or 
-		Windows_Trojan_Formbook_772cc62d or 
-		Windows_Trojan_Formbook_5799d1f2 or 
-		malware_Formbook_strings or 
-		win_formbook_auto or 
-		Formbook_1 or 
-		Windows_Trojan_Formbook
-}
-

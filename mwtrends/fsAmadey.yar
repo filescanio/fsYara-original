@@ -181,19 +181,3 @@ rule win_amadey_auto
 //		$s2 and 
 //		$s3
 //}
-
-rule fsAmadey
-{
-	meta:
-		description = "FsYARA - Malware Trends"
-		vetted_family = "amadey"
-		score = 75
-
-	condition:
-		Amadey or 
-		Windows_Trojan_Amadey_7abb059b or 
-		Windows_Trojan_Amadey_c4df8d4a or 
-		win_amadey_a9f4 or 
-		win_amadey_auto
-}
-

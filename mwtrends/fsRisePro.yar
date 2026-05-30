@@ -384,22 +384,3 @@ rule win_risepro_auto_2
 		7 of them and 
 		filesize <280576
 }
-
-rule fsRisePro
-{
-	meta:
-		description = "FsYARA - Malware Trends"
-		vetted_family = "risepro"
-		score = 75
-
-	condition:
-		RisePro or 
-		win_risepro_auto or 
-		risepro or 
-		RisePro_1 or 
-		win_risepro_auto_1 or 
-		RisePro_2 or 
-		RisePro_stealer or 
-		win_risepro_auto_2
-}
-

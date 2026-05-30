@@ -418,28 +418,3 @@ rule Lumma_alt_2
 		uint16(0)==0x5a4d and 
 		any of them
 }
-
-rule fsLumma
-{
-	meta:
-		description = "FsYARA - Malware Trends"
-		vetted_family = "lumma"
-		score = 75
-
-	condition:
-		Lumma or 
-		win_lumma_auto or 
-		Detect_lumma_stealer or 
-		win_lumma_simple_strings or 
-		LummaStealer or 
-		CAPE_Lumma or 
-		detect_Lumma_stealer or 
-		win_lumma_update_simple_strings_sep_2023 or 
-		win_lumma_auto_1 or 
-		LummaC2 or 
-		Lumma_1 or 
-		LummaRemap or 
-		win_lumma_auto_2 or 
-		Lumma_alt_2
-}
-

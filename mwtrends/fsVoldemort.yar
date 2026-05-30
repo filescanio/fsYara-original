@@ -203,14 +203,3 @@ rule Win64_Backdoor_Voldemort
             all of ($download_data_from_c2_p*)
         )
 }
-
-rule fsVoldemort
-{
-	meta:
-		description = "FsYARA - Malware Trends"
-		vetted_family = "voldemort"
-		strength	    = 75
-
-	condition:
-		Win64_Backdoor_Voldemort
-}

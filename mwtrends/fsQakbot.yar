@@ -249,21 +249,3 @@ rule malware_QakBot
 		$cryptFunc2 and 
 		$hashFunc
 }
-
-rule fsQakbot
-{
-	meta:
-		description = "FsYARA - Malware Trends"
-		vetted_family = "qakbot"
-		score = 75
-
-	condition:
-		QakBot5 or 
-		QakBot4 or 
-		QakBot_OneNote_Loader or 
-		win_qakbot_auto or 
-		win_qakbot_api_hashing_oct_2022 or 
-		QakBot or 
-		malware_QakBot
-}
-
