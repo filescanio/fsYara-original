@@ -86,6 +86,7 @@ rule QakBot_OneNote_Loader
 		$i = "start /min"
 
 	condition:
+		uint16(0)==0x5A4D and
 		$x and 
 		((3 of ($a,$b,$c,$d,$e)) or 
 			(($f or 
@@ -173,8 +174,9 @@ rule win_qakbot_auto
 		$sequence_52 = { 8bf0 83c40c 85f6 0f84f8000000 a1???????? }
 
 	condition:
-		7 of them and 
-		filesize <4883456
+		uint16(0)==0x5A4D and
+		7 of them and
+		filesize<4883456
 }
 
 rule win_qakbot_api_hashing_oct_2022
@@ -195,6 +197,7 @@ rule win_qakbot_api_hashing_oct_2022
 		$qakbot_hashing = {0f b6 04 39 33 f0 8b c6 c1 ee 04 83 e0 0f 33 34 85 ?? ?? ?? ?? 8b c6 c1 ee 04 83 e0 0f 33 34 85 ?? ?? ?? ?? 41 3b ca}
 
 	condition:
+		uint16(0)==0x5A4D and
 		any of them
 }
 
@@ -216,7 +219,7 @@ rule QakBot
 		$decrypt_config2 = {8B 45 08 8B 88 24 04 00 00 51 8B 55 10 83 EA 14 52 8B 45 0C 83 C0 14 50 6A 14 8B 4D 0C 51 E8 6C 08 00 00}
 
 	condition:
-		uint16(0)==0x5A4D and 
+		uint16(0)==0x5A4D and
 		any of ($*)
 }
 
