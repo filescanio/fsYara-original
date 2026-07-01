@@ -29,15 +29,3 @@ rule Windows_Trojan_HijackLoader_a8444812
 	condition:
 		3 of them
 }
-
-rule fsHijackLoader
-{
-	meta:
-		description = "FsYARA - Malware Trends"
-		vetted_family = "hijackloader"
-		score = 75
-
-	condition:
-		Windows_Trojan_HijackLoader_a8444812
-}
-

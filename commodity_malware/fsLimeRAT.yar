@@ -194,19 +194,3 @@ rule LimeRAT_1
 		$main and 
 		4 of ($cmd*)
 }
-
-rule fsLimeRAT
-{
-	meta:
-		description = "FsYARA - Malware Trends"
-		vetted_family = "limerat"
-		score = 75
-
-	condition:
-		Windows_Trojan_Limerat_24269a79 or 
-		ByteCode_MSIL_Backdoor_LimeRAT or 
-		LimeRAT or 
-		win_limerat_j1_00cfd931 or 
-		LimeRAT_1
-}
-

@@ -100,18 +100,3 @@ rule Latrodectus_1
 		uint16(0)==0x5A4D and 
 		all of them
 }
-
-rule fsLatrodectus
-{
-	meta:
-		description = "FsYARA - Malware Trends"
-		vetted_family = "latrodectus"
-		score = 75
-
-	condition:
-		Latrodectus or 
-		Windows_Trojan_Latrodectus_841ff697 or 
-		latrodectus_dll_str_decrypt or 
-		Latrodectus_1
-}
-

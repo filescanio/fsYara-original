@@ -162,18 +162,3 @@ rule win_gcleaner_auto_2
 		7 of them and 
 		filesize <540672
 }
-
-rule fsGCleaner
-{
-	meta:
-		description = "FsYARA - Malware Trends"
-		vetted_family = "gcleaner"
-		score = 75
-
-	condition:
-		win_gcleaner_auto or 
-		win_gcleaner or 
-		win_gcleaner_auto_1 or 
-		win_gcleaner_auto_2
-}
-
