@@ -1507,11 +1507,21 @@ rule WEBSHELL_PHP_Generic
 
         $fp1 = "# Some examples from obfuscated malware:" ascii
         $fp2 = "{@see TFileUpload} for further details." ascii
+
+        // FP field strings appear in json CVE/GHSA advisory feeds that embed wwebshell PoCs
+        $fp_cve1 = "\"ghsa_id\"" ascii
+        $fp_cve2 = "\"cve_id\"" ascii
+        $fp_cve3 = "\"github_reviewed_at\"" ascii
+        $fp_cve4 = "\"vulnerable_version_range\"" ascii
+        $fp_cve5 = "\"cwe_id\"" ascii
+        $fp_cve6 = "\"nvd_published_at\"" ascii
+        $fp_cve7 = "\"first_patched_version\"" ascii
     condition:
         //any of them or
         not (
             any of ( $gfp_tiny* )
             or 1 of ($fp*)
+            or ( (uint8(0) == 0x5B or uint8(0) == 0x7B) and 2 of ($fp_cve*) ) // avoid FP from json file that containsCVE feed's fields
         )
         and (
             (
