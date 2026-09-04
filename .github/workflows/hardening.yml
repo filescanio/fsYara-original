@@ -83,7 +83,9 @@ jobs:
     - name: Commit and Push
       if: github.ref == 'refs/heads/master'
       run: |
-        find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(/.*\)?' -delete
+        # Keep .github too: fsYara's release workflow (STI-16213) lives there
+        # and rsync below excludes dotfiles, so it would never be restored
+        find ./target-repo -mindepth 1 ! -regex '^./target-repo/.git\(hub\)?\(/.*\)?' -delete
         rsync -avq \
           --exclude="results/" \
           --exclude="results/**" \
