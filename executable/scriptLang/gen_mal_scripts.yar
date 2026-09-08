@@ -87,8 +87,10 @@ rule Certutil_Decode_OR_Download : score {
       $a4 = "certutil.exe  -decode " ascii wide
       $a5 = "certutil -urlcache -split -f http" ascii wide
       $a6 = "certutil.exe -urlcache -split -f http" ascii wide
+
+      $fp1 = "This scanner searches for a specific use of cmd.exe + certutil" ascii wide
    condition:
-      ( not MSI and filesize < 700KB and 1 of them )
+      ( not MSI and filesize < 700KB and 1 of ($a*) and not 1 of ($fp*) )
 }
 
 rule Suspicious_JS_script_content {
