@@ -517,7 +517,7 @@ rule vmdetect
         $virtualbox_mac_1c = "080027"
 
     condition:
-        any of them
+        3 of them
 }
 
 rule Check_Debugger
