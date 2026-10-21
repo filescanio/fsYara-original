@@ -216,6 +216,7 @@ rule PlugX {
             author = "JPCERT/CC Incident Response Group"
             rule_usage = "memory scan"
             reference = "internal research"
+            score = 50
 
           strings:
             $v1 = { 47 55 4c 50 00 00 00 00 }
